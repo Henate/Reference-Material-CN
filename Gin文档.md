@@ -1,4 +1,6 @@
-# Gin Web Framework
+# Gin 官方文档 (中文)
+
+此文档翻译于Gin官方README.md，如需查看最新的更新文档以及源代码，请移步[官方Github](https://github.com/gin-gonic/gin)
 
 <img align="right" width="159px" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png">
 
@@ -11,11 +13,11 @@
 [![Open Source Helpers](https://www.codetriage.com/gin-gonic/gin/badges/users.svg)](https://www.codetriage.com/gin-gonic/gin)
 [![Release](https://img.shields.io/github/release/gin-gonic/gin.svg?style=flat-square)](https://github.com/gin-gonic/gin/releases)
 
-Gin is a web framework written in Go (Golang). It features a martini-like API with much better performance, up to 40 times faster thanks to [httprouter](https://github.com/julienschmidt/httprouter). If you need performance and good productivity, you will love Gin.
+Gin是一个用Go(Golang)编写的网络架构。有着与Martini架构相似但性能更佳的API的特性，而且在[httprouter](https://github.com/julienschmidt/httprouter)的支持下性能有40倍的提高。如果你需要高性能和高生产力，你将喜欢上Gin。
 
 ![Gin console logger](https://gin-gonic.github.io/gin/other/console.png)
 
-## Contents
+## 内容
 
 - [Installation](#installation)
 - [Prerequisite](#prerequisite)
@@ -66,68 +68,68 @@ Gin is a web framework written in Go (Golang). It features a martini-like API wi
 - [Testing](#testing)
 - [Users](#users)
 
-## Installation
+## 安装
 
-To install Gin package, you need to install Go and set your Go workspace first.
+如需安装Gin包，首先你需要安装Go和设置你的GO工作空间。
 
-1. Download and install it:
+1. 下载以及安装：
 
 ```sh
 $ go get -u github.com/gin-gonic/gin
 ```
 
-2. Import it in your code:
+2. 导入到代码中：
 
 ```go
 import "github.com/gin-gonic/gin"
 ```
 
-3. (Optional) Import `net/http`. This is required for example if using constants such as `http.StatusOK`.
+3. （可选）如果需要使用到`http.StatusOK`等变量，则需要导入`net/http`。
 
 ```go
 import "net/http"
 ```
 
-### Use a vendor tool like [Govendor](https://github.com/kardianos/govendor)
+### 使用依赖包管理工具[Govendor](https://github.com/kardianos/govendor)
 
 1. `go get` govendor
 
 ```sh
 $ go get github.com/kardianos/govendor
 ```
-2. Create your project folder and `cd` inside
+2. 创建工程目录并使用`cd`进入文件夹中
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/myusername/project && cd "$_"
 ```
 
-3. Vendor init your project and add gin
+3. 使用Vendor初始化工程以及添加gin
 
 ```sh
 $ govendor init
 $ govendor fetch github.com/gin-gonic/gin@v1.3
 ```
 
-4. Copy a starting template inside your project
+4. 复制一个开始模板到工程中
 
 ```sh
 $ curl https://raw.githubusercontent.com/gin-gonic/gin/master/examples/basic/main.go > main.go
 ```
 
-5. Run your project
+5. 运行工程
 
 ```sh
 $ go run main.go
 ```
 
-## Prerequisite
+## 依赖
 
-Now Gin requires Go 1.6 or later and Go 1.7 will be required soon.
+现在运行Gin需要在Go 1.6以及更后的版本。且不久将会被要求运行在Go 1.7中。
 
-## Quick start
+## 快速启动
  
 ```sh
-# assume the following codes in example.go file
+#假设以下代码在文件example.go中
 $ cat example.go
 ```
 
@@ -152,11 +154,11 @@ func main() {
 $ go run example.go
 ```
 
-## Benchmarks
+## 性能基准测试（Benchmarks）
 
-Gin uses a custom version of [HttpRouter](https://github.com/julienschmidt/httprouter)
+Gin 所使用的是 [HttpRouter](https://github.com/julienschmidt/httprouter)的一个自定义版本
 
-[See all benchmarks](/BENCHMARKS.md)
+[查看所有 benchmarks](/BENCHMARKS.md)
 
 Benchmark name                              | (1)        | (2)         | (3) 		    | (4)
 --------------------------------------------|-----------:|------------:|-----------:|---------:
@@ -188,38 +190,38 @@ BenchmarkTigerTonic_GithubAll               |    1000    |  1439483    |  239104
 BenchmarkTraffic_GithubAll                  |     100    | 11383067    | 2659329    | 21848
 BenchmarkVulcan_GithubAll                   |    5000    |   394253    |   19894    |   609
 
-- (1): Total Repetitions achieved in constant time, higher means more confident result
-- (2): Single Repetition Duration (ns/op), lower is better
-- (3): Heap Memory (B/op), lower is better
-- (4): Average Allocations per Repetition (allocs/op), lower is better
+- (1): 固定时间内重复地测试并达到恒定值，数据值越高则代表越确切
+- (2):单次重复时间 (ns/op)，数值越低越好
+- (3): 堆内存 (B/op)，数值越低越好
+- (4): 每次重复的平均内存分配时间(allocs/op)，数值越低越好
 
-## Gin v1. stable
+## Gin v1. 稳定版
 
-- [x] Zero allocation router.
-- [x] Still the fastest http router and framework. From routing to writing.
-- [x] Complete suite of unit tests
-- [x] Battle tested
-- [x] API frozen, new releases will not break your code.
+- [x] 零分配路由器.
+- [x] 最快的分配路由及编写代码http路由架构。
+- [x] 拥有成套的单元测试
+- [x] 通过Battle tested
+- [x] 使用API冻结，新的版本更新后将不会影响到你原本的代码
 
-## Build with [jsoniter](https://github.com/json-iterator/go)
+## 使用 [jsoniter](https://github.com/json-iterator/go)
 
-Gin uses `encoding/json` as default json package but you can change to [jsoniter](https://github.com/json-iterator/go) by build from other tags.
+Gin使用的默认json包为 `encoding/json` ，但你可以通过构建其他tags参数将默认值更改为使用 [jsoniter](https://github.com/json-iterator/go)。
 
 ```sh
 $ go build -tags=jsoniter .
 ```
 
-## API Examples
+## API 例子
 
-### Using GET, POST, PUT, PATCH, DELETE and OPTIONS
+### 使用 GET, POST, PUT, PATCH, DELETE 以及 OPTIONS
 
 ```go
 func main() {
-	// Disable Console Color
+	// 禁止控制台颜色
 	// gin.DisableConsoleColor()
 
-	// Creates a gin router with default middleware:
-	// logger and recovery (crash-free) middleware
+	// 创建带有默认中间件的路由
+	// 中间件：日志和恢复（无崩溃）
 	router := gin.Default()
 
 	router.GET("/someGet", getting)
@@ -237,13 +239,13 @@ func main() {
 }
 ```
 
-### Parameters in path
+### 路径中的参数
 
 ```go
 func main() {
 	router := gin.Default()
 
-	// This handler will match /user/john but will not match /user/ or /user
+        //这一个处理程序匹配如/user/john，并不会匹配/user/ 或者 /user
 	router.GET("/user/:name", func(c *gin.Context) {
 		name := c.Param("name")
 		c.String(http.StatusOK, "Hello %s", name)
@@ -262,17 +264,18 @@ func main() {
 }
 ```
 
-### Querystring parameters
+### 查询字符串参数
 
 ```go
 func main() {
 	router := gin.Default()
 
-	// Query string parameters are parsed using the existing underlying request object.
-	// The request responds to a url matching:  /welcome?firstname=Jane&lastname=Doe
+    
+        //查询字符串参数使用请求对象作解释
+        //请求匹配以下格式的url将会获得响应： /welcome?firstname=Jane&lastname=Doe
 	router.GET("/welcome", func(c *gin.Context) {
 		firstname := c.DefaultQuery("firstname", "Guest")
-		lastname := c.Query("lastname") // shortcut for c.Request.URL.Query().Get("lastname")
+		lastname := c.Query("lastname") // c.Request.URL.Query().Get("lastname")的快捷使用方式
 
 		c.String(http.StatusOK, "Hello %s %s", firstname, lastname)
 	})
@@ -300,7 +303,7 @@ func main() {
 }
 ```
 
-### Another example: query + post form
+### 其他例子: query + post form
 
 ```
 POST /post?id=1234&page=1 HTTP/1.1
@@ -330,7 +333,7 @@ func main() {
 id: 1234; page: 1; name: manu; message: this_is_great
 ```
 
-### Map as querystring or postform parameters
+### Map 作为查询字符串或者 postform 的参数
 
 ```
 POST /post?ids[a]=1234&ids[b]=hello HTTP/1.1
@@ -358,27 +361,27 @@ func main() {
 ids: map[b:hello a:1234], names: map[second:tianou first:thinkerou]
 ```
 
-### Upload files
+### 上传文件
 
-#### Single file
+#### 单一文件
 
-References issue [#774](https://github.com/gin-gonic/gin/issues/774) and detail [example code](examples/upload-file/single).
+参考 issue [#774](https://github.com/gin-gonic/gin/issues/774) 以及 detail [example code](examples/upload-file/single).
 
-`file.Filename` **SHOULD NOT** be trusted. See [`Content-Disposition` on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#Directives) and [#1693](https://github.com/gin-gonic/gin/issues/1693)
+`file.Filename` **不能** 相信有效性. 参考 [`Content-Disposition` on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#Directives) and [#1693](https://github.com/gin-gonic/gin/issues/1693)
 
-> The filename is always optional and must not be used blindly by the application: path information should be stripped, and conversion to the server file system rules should be done.
+> 因为 filename 总是随意输入的因此不能盲目地使用到应用上：路径信息应当先被剥离出来，转化成为符合服务器文件系统规则后才能使用
 
 ```go
 func main() {
 	router := gin.Default()
-	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	// 为multipart forms 设定最小的容量限制 (默认值为 32 MiB)
 	// router.MaxMultipartMemory = 8 << 20  // 8 MiB
 	router.POST("/upload", func(c *gin.Context) {
-		// single file
+		// 单一文件
 		file, _ := c.FormFile("file")
 		log.Println(file.Filename)
 
-		// Upload the file to specific dst.
+		// 上传文件到指定的 dst.
 		// c.SaveUploadedFile(file, dst)
 
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
@@ -387,7 +390,7 @@ func main() {
 }
 ```
 
-How to `curl`:
+使用 `curl`发送命名:
 
 ```bash
 curl -X POST http://localhost:8080/upload \
@@ -395,14 +398,14 @@ curl -X POST http://localhost:8080/upload \
   -H "Content-Type: multipart/form-data"
 ```
 
-#### Multiple files
+#### 多文件
 
-See the detail [example code](examples/upload-file/multiple).
+查看参考 detail [example code](examples/upload-file/multiple).
 
 ```go
 func main() {
 	router := gin.Default()
-	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	// 为multipart forms 设定最小的容量限制 (默认值为 32 MiB)
 	// router.MaxMultipartMemory = 8 << 20  // 8 MiB
 	router.POST("/upload", func(c *gin.Context) {
 		// Multipart form
@@ -412,7 +415,7 @@ func main() {
 		for _, file := range files {
 			log.Println(file.Filename)
 
-			// Upload the file to specific dst.
+			// 上传文件到指定的 dst.
 			// c.SaveUploadedFile(file, dst)
 		}
 		c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
@@ -421,7 +424,7 @@ func main() {
 }
 ```
 
-How to `curl`:
+使用 `curl`发送命名:
 
 ```bash
 curl -X POST http://localhost:8080/upload \
@@ -430,7 +433,7 @@ curl -X POST http://localhost:8080/upload \
   -H "Content-Type: multipart/form-data"
 ```
 
-### Grouping routes
+### 组合路由
 
 ```go
 func main() {
@@ -456,15 +459,15 @@ func main() {
 }
 ```
 
-### Blank Gin without middleware by default
+### 默认无中间件的空白Gin
 
-Use
+使用以下方法
 
 ```go
 r := gin.New()
 ```
 
-instead of
+代替
 
 ```go
 // Default With the Logger and Recovery middleware already attached
@@ -472,56 +475,56 @@ r := gin.Default()
 ```
 
 
-### Using middleware
+### 使用中间件
 ```go
 func main() {
-	// Creates a router without any middleware by default
+	// 创建默认无中间件的的路由
 	r := gin.New()
 
-	// Global middleware
-	// Logger middleware will write the logs to gin.DefaultWriter even if you set with GIN_MODE=release.
-	// By default gin.DefaultWriter = os.Stdout
+	// 全局中间件
+	// Logger中间件将会把log写到gin.DefaultWriter中，即使你设置了GIN_MODE=release。
+	// 默认gin.DefaultWriter = os.Stdout
 	r.Use(gin.Logger())
 
-	// Recovery middleware recovers from any panics and writes a 500 if there was one.
+	// Recovery中间件能从panic中恢复并丢出500。
 	r.Use(gin.Recovery())
 
-	// Per route middleware, you can add as many as you desire.
+	// 你可以添加任意数量的路由中间件
 	r.GET("/benchmark", MyBenchLogger(), benchEndpoint)
 
-	// Authorization group
+	// 授权验证Authorization组：
 	// authorized := r.Group("/", AuthRequired())
-	// exactly the same as:
+	// 另一种使用方法:
 	authorized := r.Group("/")
 	// per group middleware! in this case we use the custom created
-	// AuthRequired() middleware just in the "authorized" group.
+	// 中间件AuthRequired()就在"authorized"组中。
 	authorized.Use(AuthRequired())
 	{
 		authorized.POST("/login", loginEndpoint)
 		authorized.POST("/submit", submitEndpoint)
 		authorized.POST("/read", readEndpoint)
 
-		// nested group
+		// 嵌入组
 		testing := authorized.Group("testing")
 		testing.GET("/analytics", analyticsEndpoint)
 	}
 
-	// Listen and serve on 0.0.0.0:8080
+	// 监听及服务于 0.0.0.0:8080
 	r.Run(":8080")
 }
 ```
 
-### How to write log file
+### 如何写下log文件
 ```go
 func main() {
-    // Disable Console Color, you don't need console color when writing the logs to file.
+    // 禁用控制台颜色，你在写log到文件过程中不需要使用控制台颜色。
     gin.DisableConsoleColor()
 
-    // Logging to a file.
+    // 写log到文件中
     f, _ := os.Create("gin.log")
     gin.DefaultWriter = io.MultiWriter(f)
 
-    // Use the following code if you need to write the logs to file and console at the same time.
+    // 如果你需要把log写到文件以及控制台中，使用下行代码。
     // gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
     router := gin.Default()
@@ -533,16 +536,16 @@ func main() {
 }
 ```
 
-### Custom Log Format
+### 自定义日志格式
 ```go
 func main() {
 	router := gin.New()
 
-	// LoggerWithFormatter middleware will write the logs to gin.DefaultWriter
-	// By default gin.DefaultWriter = os.Stdout
+	// 中间件LoggerWithFormatter将会记录日志到gin.DefaultWriter中。
+	// 默认gin.DefaultWriter = os.Stdout
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 
-		// your custom format
+		// 你的自定义格式日志
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
 				param.ClientIP,
 				param.TimeStamp.Format(time.RFC1123),
@@ -565,33 +568,34 @@ func main() {
 }
 ```
 
-**Sample Output**
+**输出示例**
 ```
 ::1 - [Fri, 07 Dec 2018 17:04:38 JST] "GET /ping HTTP/1.1 200 122.767µs "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36" "
 ```
 
-### Model binding and validation
+### 模型绑定及验证
 
-To bind a request body into a type, use model binding. We currently support binding of JSON, XML, YAML and standard form values (foo=bar&boo=baz).
+为了绑定一个请求主体到一个类型中，会使用到模型绑定。我们现在已经支持绑定的有JSON,XML,YAML以及标准表单值(foo=bar&boo=baz)。
 
-Gin uses [**go-playground/validator.v8**](https://github.com/go-playground/validator) for validation. Check the full docs on tags usage [here](http://godoc.org/gopkg.in/go-playground/validator.v8#hdr-Baked_In_Validators_and_Tags).
+Gin使用[**go-playground/validator.v8**](https://github.com/go-playground/validator)作验证工作。查看标签使用方法的完整文档可以[点击这里](http://godoc.org/gopkg.in/go-playground/validator.v8#hdr-Baked_In_Validators_and_Tags)。
 
-Note that you need to set the corresponding binding tag on all fields you want to bind. For example, when binding from JSON, set `json:"fieldname"`.
+需要记住的是，你需要在所有你想要绑定的字段上设置正响应的绑定标签。例如当从JSON绑定时，设置`json:"fieldname"`。
 
-Also, Gin provides two sets of methods for binding:
+同样的是，Gin提供两套绑定的方法：
 - **Type** - Must bind
   - **Methods** - `Bind`, `BindJSON`, `BindXML`, `BindQuery`, `BindYAML`
-  - **Behavior** - These methods use `MustBindWith` under the hood. If there is a binding error, the request is aborted with `c.AbortWithError(400, err).SetType(ErrorTypeBind)`. This sets the response status code to 400 and the `Content-Type` header is set to `text/plain; charset=utf-8`. Note that if you try to set the response code after this, it will result in a warning `[GIN-debug] [WARNING] Headers were already written. Wanted to override status code 400 with 422`. If you wish to have greater control over the behavior, consider using the `ShouldBind` equivalent method.
+  - **Behavior** - 这些方法在hood下使用 `MustBindWith` 。如果出现一个绑定错误，请求将会被`c.AbortWithError(400, err).SetType(ErrorTypeBind)`终止。这使得响应状态码设置为400，以及`Content-Type` 头设置成`text/plain; charset=utf-8`。需要注意的是，如果你想在这之后设置响应代码，将会发出一个警告`[GIN-debug] [WARNING] Headers were already written. Wanted to override status code 400 with 422`。如果你想要有一个更佳的控制行为，请考虑使用有相同效果的方法 `ShouldBind` 。
+ 
 - **Type** - Should bind
   - **Methods** - `ShouldBind`, `ShouldBindJSON`, `ShouldBindXML`, `ShouldBindQuery`, `ShouldBindYAML`
-  - **Behavior** - These methods use `ShouldBindWith` under the hood. If there is a binding error, the error is returned and it is the developer's responsibility to handle the request and error appropriately.
+  - **Behavior** - 这些方法在hood下使用 `ShouldBindWith` 。如果出现绑定错误，将会返回错误值。开发者需要合理地处理请求与错误。
 
-When using the Bind-method, Gin tries to infer the binder depending on the Content-Type header. If you are sure what you are binding, you can use `MustBindWith` or `ShouldBindWith`.
+当使用绑定方法时，Gin会尝试通过Content-Type 头信息推断出绑定器的依赖，如果你能确定需要绑定的对象，可以使用`MustBindWith` 或者 `ShouldBindWith`。
 
-You can also specify that specific fields are required. If a field is decorated with `binding:"required"` and has a empty value when binding, an error will be returned.
+你也可以详细说明需要的特定字段。如果字段使用`binding:"required"` 修饰但绑定时值为空，就会返回一个错误。
 
 ```go
-// Binding from JSON
+// 从JSON绑定
 type Login struct {
 	User     string `form:"user" json:"user" xml:"user"  binding:"required"`
 	Password string `form:"password" json:"password" xml:"password" binding:"required"`
@@ -659,9 +663,9 @@ func main() {
 }
 ```
 
-**Sample request**
+**请求示例**
 ```shell
-$ curl -v -X POST \
+$ curl -v POST \
   http://localhost:8080/loginJSON \
   -H 'content-type: application/json' \
   -d '{ "user": "manu" }'
@@ -681,13 +685,13 @@ $ curl -v -X POST \
 {"error":"Key: 'Login.Password' Error:Field validation for 'Password' failed on the 'required' tag"}
 ```
 
-**Skip validate**
+**跳过验证**
 
-When running the above example using the above the `curl` command, it returns error. Because the example use `binding:"required"` for `Password`. If use `binding:"-"` for `Password`, then it will not return error when running the above example again.
+当运行上述的例子使用`curl` 命令时，将会返回错误。因为示例中`Password`.字段使用了`binding:"required"` 。如果`Password`.字段使用`binding:"-"` ，上述例子将不会返回错误。
 
-### Custom Validators
+### 自定义验证器
 
-It is also possible to register custom validators. See the [example code](examples/custom-validation/server.go).
+可以注册使用自定义验证器，参考[示例代码](%28examples/custom-validation/server.go%29.)。
 
 [embedmd]:# (examples/custom-validation/server.go go)
 ```go
@@ -751,12 +755,12 @@ $ curl "localhost:8085/bookable?check_in=2018-03-08&check_out=2018-03-09"
 {"error":"Key: 'Booking.CheckIn' Error:Field validation for 'CheckIn' failed on the 'bookabledate' tag"}
 ```
 
-[Struct level validations](https://github.com/go-playground/validator/releases/tag/v8.7) can also be registered this way.
-See the [struct-lvl-validation example](examples/struct-lvl-validations) to learn more.
+[结构体级别验证](https://github.com/go-playground/validator/releases/tag/v8.7)也可以使用这种方法注册。
+查看 [struct-lvl-validation example](examples/struct-lvl-validations) 学到更多。
 
-### Only Bind Query String
+### 只绑定查询字符串
 
-`ShouldBindQuery` function only binds the query params and not the post data. See the [detail information](https://github.com/gin-gonic/gin/issues/742#issuecomment-315953017).
+`ShouldBindQuery` 函数只绑定查询参数而没有post数据，参考 [详细信息](https://github.com/gin-gonic/gin/issues/742#issuecomment-315953017).
 
 ```go
 package main
@@ -790,9 +794,9 @@ func startPage(c *gin.Context) {
 
 ```
 
-### Bind Query String or Post Data
+### 绑定字符串或Post数据
 
-See the [detail information](https://github.com/gin-gonic/gin/issues/742#issuecomment-264681292).
+参考 [详细信息](https://github.com/gin-gonic/gin/issues/742#issuecomment-264681292).
 
 ```go
 package main
@@ -836,9 +840,9 @@ Test it with:
 $ curl -X GET "localhost:8085/testing?name=appleboy&address=xyz&birthday=1992-03-15"
 ```
 
-### Bind Uri
+### 绑定Uri
 
-See the [detail information](https://github.com/gin-gonic/gin/issues/846).
+参考 [详细信息](https://github.com/gin-gonic/gin/issues/846).
 
 ```go
 package main
@@ -870,9 +874,9 @@ $ curl -v localhost:8088/thinkerou/987fbc97-4bed-5078-9f07-9141ba07c9f3
 $ curl -v localhost:8088/thinkerou/not-uuid
 ```
 
-### Bind HTML checkboxes
+### 绑定 HTML 复选框
 
-See the [detail information](https://github.com/gin-gonic/gin/issues/129#issuecomment-124260092)
+参考 [详细信息](https://github.com/gin-gonic/gin/issues/129#issuecomment-124260092)
 
 main.go
 
@@ -910,13 +914,13 @@ form.html
 </form>
 ```
 
-result:
+结果:
 
 ```
 {"color":["red","green","blue"]}
 ```
 
-### Multipart/Urlencoded binding
+### Multipart/Urlencoded 绑定
 
 ```go
 package main
@@ -933,11 +937,11 @@ type LoginForm struct {
 func main() {
 	router := gin.Default()
 	router.POST("/login", func(c *gin.Context) {
-		// you can bind multipart form with explicit binding declaration:
+		// 你可以使用明确的绑定声明绑定一个multipart表单
 		// c.ShouldBindWith(&form, binding.Form)
-		// or you can simply use autobinding with ShouldBind method:
+		// 又或者你可以简单地使用自动绑定方法ShouldBind：
 		var form LoginForm
-		// in this case proper binding will be automatically selected
+		// 在这个例子中会自动选择一个合适的绑定
 		if c.ShouldBind(&form) == nil {
 			if form.User == "user" && form.Password == "password" {
 				c.JSON(200, gin.H{"status": "you are logged in"})
@@ -950,24 +954,24 @@ func main() {
 }
 ```
 
-Test it with:
+使用以下测试:
 ```sh
 $ curl -v --form user=user --form password=password http://localhost:8080/login
 ```
 
-### XML, JSON, YAML and ProtoBuf rendering
+### XML, JSON, YAML 以及 ProtoBuf 渲染
 
 ```go
 func main() {
 	r := gin.Default()
 
-	// gin.H is a shortcut for map[string]interface{}
+	//  gin.H为map[string]interface{}的快捷方式 
 	r.GET("/someJSON", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "hey", "status": http.StatusOK})
 	})
 
 	r.GET("/moreJSON", func(c *gin.Context) {
-		// You also can use a struct
+		// 你也可以使用一个结构体
 		var msg struct {
 			Name    string `json:"user"`
 			Message string
@@ -976,8 +980,8 @@ func main() {
 		msg.Name = "Lena"
 		msg.Message = "hey"
 		msg.Number = 123
-		// Note that msg.Name becomes "user" in the JSON
-		// Will output  :   {"user": "Lena", "Message": "hey", "Number": 123}
+		// 需要注意是在JSON中msg.Name变成了字段"user" 
+		// 将会输出  :   {"user": "Lena", "Message": "hey", "Number": 123}
 		c.JSON(http.StatusOK, msg)
 	})
 
@@ -992,13 +996,13 @@ func main() {
 	r.GET("/someProtoBuf", func(c *gin.Context) {
 		reps := []int64{int64(1), int64(2)}
 		label := "test"
-		// The specific definition of protobuf is written in the testdata/protoexample file.
+		// 这一个protobuf特殊类型被定义在testdata/protoexample文件中
 		data := &protoexample.Test{
 			Label: &label,
 			Reps:  reps,
 		}
-		// Note that data becomes binary data in the response
-		// Will output protoexample.Test protobuf serialized data
+		// 需要注意的是数据在响应中变成了二进制数据
+		// 将会输出一个proto例子，测试protobuf序列化数据
 		c.ProtoBuf(http.StatusOK, data)
 	})
 
@@ -1007,21 +1011,22 @@ func main() {
 }
 ```
 
-#### SecureJSON
+#### 安全JSON
 
-Using SecureJSON to prevent json hijacking. Default prepends `"while(1),"` to response body if the given struct is array values.
+使用安全JSON用于防止JSON劫持。如果给定的是数组值，将会设定一个预设值`"while(1),"` 
+
 
 ```go
 func main() {
 	r := gin.Default()
 
-	// You can also use your own secure json prefix
+	// 你也可以使用你的自己的安全JSON前缀
 	// r.SecureJsonPrefix(")]}',\n")
 
 	r.GET("/someJSON", func(c *gin.Context) {
 		names := []string{"lena", "austin", "foo"}
 
-		// Will output  :   while(1);["lena","austin","foo"]
+		// 将会输出  :   while(1);["lena","austin","foo"]
 		c.SecureJSON(http.StatusOK, names)
 	})
 
@@ -1031,7 +1036,7 @@ func main() {
 ```
 #### JSONP
 
-Using JSONP to request data from a server  in a different domain. Add callback to response body if the query parameter callback exists.
+使用JSONP向不同域的服务器请求数据.如果查询参数中存在回调函数,则需要增加回调函数到响应主体中.
 
 ```go
 func main() {
@@ -1054,7 +1059,7 @@ func main() {
 
 #### AsciiJSON
 
-Using AsciiJSON to Generates ASCII-only JSON with escaped non-ASCII chracters.
+使用 非 ASCII 字符组成的AsciiJSON 生成仅有 ASCII 字符的 JSON.
 
 ```go
 func main() {
@@ -1066,7 +1071,7 @@ func main() {
 			"tag":  "<br>",
 		}
 
-		// will output : {"lang":"GO\u8bed\u8a00","tag":"\u003cbr\u003e"}
+		// 将输出: {"lang":"GO\u8bed\u8a00","tag":"\u003cbr\u003e"}
 		c.AsciiJSON(http.StatusOK, data)
 	})
 
@@ -1076,22 +1081,20 @@ func main() {
 ```
 
 #### PureJSON
-
-Normally, JSON replaces special HTML characters with their unicode entities, e.g. `<` becomes  `\u003c`. If you want to encode such characters literally, you can use PureJSON instead.
-This feature is unavailable in Go 1.6 and lower.
+通常,JSON使用unicode字符去取代特殊的HTML字符,比如:`<` 会变成`\u003c`.如果你想编码成这种字符文字,你可以使用PureJSON, 该特性在Go 1.6及以下版本是不支持的.
 
 ```go
 func main() {
 	r := gin.Default()
 	
-	// Serves unicode entities
+	// 服务于unicode字符
 	r.GET("/json", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"html": "<b>Hello, world!</b>",
 		})
 	})
 	
-	// Serves literal characters
+	// 服务于文字字符
 	r.GET("/purejson", func(c *gin.Context) {
 		c.PureJSON(200, gin.H{
 			"html": "<b>Hello, world!</b>",
@@ -1103,7 +1106,7 @@ func main() {
 }
 ```
 
-### Serving static files
+### 静态文件服务
 
 ```go
 func main() {
@@ -1117,7 +1120,7 @@ func main() {
 }
 ```
 
-### Serving data from reader
+### 在阅读程序中提供数据服务
 
 ```go
 func main() {
@@ -1143,9 +1146,9 @@ func main() {
 }
 ```
 
-### HTML rendering
+### HTML 渲染
 
-Using LoadHTMLGlob() or LoadHTMLFiles()
+可使用 LoadHTMLGlob() 或者 LoadHTMLFiles()
 
 ```go
 func main() {
@@ -1171,7 +1174,7 @@ templates/index.tmpl
 </html>
 ```
 
-Using templates with same name in different directories
+在不同路径下使用同名的 templates
 
 ```go
 func main() {
@@ -1215,9 +1218,9 @@ templates/users/index.tmpl
 {{ end }}
 ```
 
-#### Custom Template renderer
+#### 自定义模板渲染
 
-You can also use your own html template render
+你可以使用自定义的html模板渲染
 
 ```go
 import "html/template"
@@ -1230,9 +1233,9 @@ func main() {
 }
 ```
 
-#### Custom Delimiters
+#### 自定义定界符
 
-You may use custom delims
+你可以使用自定义定界符
 
 ```go
 	r := gin.Default()
@@ -1240,9 +1243,9 @@ You may use custom delims
 	r.LoadHTMLGlob("/path/to/templates")
 ```
 
-#### Custom Template Funcs
+#### 自定义模板函数
 
-See the detail [example code](examples/template).
+查看详细 [示例代码](examples/template).
 
 main.go
 
@@ -1291,13 +1294,13 @@ Result:
 Date: 2017/07/01
 ```
 
-### Multitemplate
+### 多模板
 
-Gin allow by default use only one html.Template. Check [a multitemplate render](https://github.com/gin-contrib/multitemplate) for using features like go 1.6 `block template`.
+Gin默认允许使用一个HTML模板.参考[多模板渲染](https://github.com/gin-contrib/multitemplate) 来使用多模板特性如go 1.6 `block template`.
 
-### Redirects
+### 重定向
 
-Issuing a HTTP redirect is easy. Both internal and external locations are supported.
+发起一个HTTP重定向非常地简单。同时支持内置与外部地址。
 
 ```go
 r.GET("/test", func(c *gin.Context) {
@@ -1306,7 +1309,7 @@ r.GET("/test", func(c *gin.Context) {
 ```
 
 
-Issuing a Router redirect, use `HandleContext` like below.
+如发起一个路由器重定向，如下例中使用 `HandleContext` 。
 
 ``` go
 r.GET("/test", func(c *gin.Context) {
@@ -1319,25 +1322,25 @@ r.GET("/test2", func(c *gin.Context) {
 ```
 
 
-### Custom Middleware
+### 自定义中间件
 
 ```go
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
 
-		// Set example variable
+		// 设定参数example
 		c.Set("example", "12345")
 
-		// before request
+		// 请求前
 
 		c.Next()
 
-		// after request
+		// 请求后
 		latency := time.Since(t)
 		log.Print(latency)
 
-		// access the status we are sending
+		// 访问我们发送的状态status
 		status := c.Writer.Status()
 		log.Println(status)
 	}
@@ -1350,7 +1353,7 @@ func main() {
 	r.GET("/test", func(c *gin.Context) {
 		example := c.MustGet("example").(string)
 
-		// it would print: "12345"
+		// 将会打印： "12345"
 		log.Println(example)
 	})
 
@@ -1359,10 +1362,10 @@ func main() {
 }
 ```
 
-### Using BasicAuth() middleware
+### 使用 BasicAuth() 中间件
 
 ```go
-// simulate some private data
+// 使用仿真隐私数据
 var secrets = gin.H{
 	"foo":    gin.H{"email": "foo@bar.com", "phone": "123433"},
 	"austin": gin.H{"email": "austin@example.com", "phone": "666"},
@@ -1372,8 +1375,8 @@ var secrets = gin.H{
 func main() {
 	r := gin.Default()
 
-	// Group using gin.BasicAuth() middleware
-	// gin.Accounts is a shortcut for map[string]string
+	// Group中使用gin.BasicAuth()作中间件
+	// gin.Accounts 是 map[string]string 的快捷方式
 	authorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
 		"foo":    "bar",
 		"austin": "1234",
