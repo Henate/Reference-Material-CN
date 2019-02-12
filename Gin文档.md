@@ -1401,31 +1401,31 @@ func main() {
 }
 ```
 
-### Goroutines inside a middleware
+### 中间件中的Goroutines
 
-When starting new Goroutines inside a middleware or handler, you **SHOULD NOT** use the original context inside it, you have to use a read-only copy.
+当在中间件或者处理函数中使用Goroutines时，你**不能**在其内部使用原始的上下文，而应该使用一个只读的副本。
 
 ```go
 func main() {
 	r := gin.Default()
 
 	r.GET("/long_async", func(c *gin.Context) {
-		// create copy to be used inside the goroutine
+		// 创建一个在goroutine中使用的副本
 		cCp := c.Copy()
 		go func() {
-			// simulate a long task with time.Sleep(). 5 seconds
+			// 使用time.Sleep()仿真一个5秒种的长时间任务
 			time.Sleep(5 * time.Second)
 
-			// note that you are using the copied context "cCp", IMPORTANT
+			// 需要注意的是你需要使用上下文的副本"cCp"，非常重要！
 			log.Println("Done! in path " + cCp.Request.URL.Path)
 		}()
 	})
 
 	r.GET("/long_sync", func(c *gin.Context) {
-		// simulate a long task with time.Sleep(). 5 seconds
+		// 使用time.Sleep()仿真一个5秒种的长时间任务
 		time.Sleep(5 * time.Second)
 
-		// since we are NOT using a goroutine, we do not have to copy the context
+		// 因为没有使用goroutine，我们不需要上下文的副本。
 		log.Println("Done! in path " + c.Request.URL.Path)
 	})
 
@@ -1434,9 +1434,9 @@ func main() {
 }
 ```
 
-### Custom HTTP configuration
+### 自定义HTTP配置
 
-Use `http.ListenAndServe()` directly, like this:
+如下，直接使用`http.ListenAndServe()` ：
 
 ```go
 func main() {
@@ -1461,12 +1461,11 @@ func main() {
 }
 ```
 
-### Support Let's Encrypt
+### 支持 Let's Encrypt (小绿锁)
 
-example for 1-line LetsEncrypt HTTPS servers.
+使用一键 LetsEncrypt 搭建 HTTPS 服务器的例子。
 
-[embedmd]:# (examples/auto-tls/example1/main.go go)
-```go
+```
 package main
 
 import (
@@ -1488,7 +1487,7 @@ func main() {
 }
 ```
 
-example for custom autocert manager.
+自定义autocert管理器的例子。
 
 [embedmd]:# (examples/auto-tls/example2/main.go go)
 ```go
@@ -1520,9 +1519,9 @@ func main() {
 }
 ```
 
-### Run multiple service using Gin
+### 使用Gin运行多个服务
 
-See the [question](https://github.com/gin-gonic/gin/issues/346) and try the following example:
+可以参考这一个[问题](https://github.com/gin-gonic/gin/issues/346)以及实验以下例子：
 
 [embedmd]:# (examples/multiple-service/main.go go)
 ```go
@@ -1602,12 +1601,12 @@ func main() {
 }
 ```
 
-### Graceful restart or stop
+### 优雅地重启或停止
 
-Do you want to graceful restart or stop your web server?
-There are some ways this can be done.
+你希望能够优雅地重启或停止你的web服务器吗？
+有一些方法可以做到这一点。
 
-We can use [fvbock/endless](https://github.com/fvbock/endless) to replace the default `ListenAndServe`. Refer issue [#296](https://github.com/gin-gonic/gin/issues/296) for more details.
+我们可以使用 [fvbock/endless](https://github.com/fvbock/endless) 取代默认的`ListenAndServe`。参考 issue [#296](https://github.com/gin-gonic/gin/issues/296) 可以获得更多细节。
 
 ```go
 router := gin.Default()
@@ -1616,13 +1615,13 @@ router.GET("/", handler)
 endless.ListenAndServe(":4242", router)
 ```
 
-An alternative to endless:
+使用endless的多种可供方法：
 
-* [manners](https://github.com/braintree/manners): A polite Go HTTP server that shuts down gracefully.
-* [graceful](https://github.com/tylerb/graceful): Graceful is a Go package enabling graceful shutdown of an http.Handler server.
-* [grace](https://github.com/facebookgo/grace): Graceful restart & zero downtime deploy for Go servers.
+* [manners](https://github.com/braintree/manners): 一个优雅的GO HTTP服务器提供优雅地关闭方法。
+* [graceful](https://github.com/tylerb/graceful): Graceful是一个Go包能使http.Handler服务器优雅地关闭。
+* [grace](https://github.com/facebookgo/grace): 优雅地重启以及零停机部署Go服务器。
 
-If you are using Go 1.8, you may not need to use this library! Consider using http.Server's built-in [Shutdown()](https://golang.org/pkg/net/http/#Server.Shutdown) method for graceful shutdowns. See the full [graceful-shutdown](./examples/graceful-shutdown) example with gin.
+如果你使用Go 1.8，你可能不需要用到这个库！参考使用http.Server的内建 [Shutdown()](https://golang.org/pkg/net/http/#Server.Shutdown) 方法提供优雅的关机方式。查看Gin上全部的[graceful-shutdown](./examples/graceful-shutdown) 例子。
 
 [embedmd]:# (examples/graceful-shutdown/graceful-shutdown/server.go go)
 ```go
