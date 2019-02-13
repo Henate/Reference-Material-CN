@@ -1675,9 +1675,9 @@ func main() {
 }
 ```
 
-### Build a single binary with templates
+### 构建带有模板的单个二进制
 
-You can build a server into a single binary containing templates by using [go-assets][].
+通过使用[go-assets](https://github.com/jessevdk/go-assets)，你可以在单二进制模板中构建一个服务器
 
 [go-assets]: https://github.com/jessevdk/go-assets
 
@@ -1717,11 +1717,11 @@ func loadTemplate() (*template.Template, error) {
 }
 ```
 
-See a complete example in the `examples/assets-in-binary` directory.
+可以在目录`examples/assets-in-binary` 下查看完整的示例
 
-### Bind form-data request with custom struct
+### 使用自定义结构体绑定form-data请求
 
-The follow example using custom struct:
+以下例子中使用到自定义结构体：
 
 ```go
 type StructA struct {
