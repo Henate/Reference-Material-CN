@@ -19,13 +19,13 @@ Gin是一个用Go(Golang)编写的网络架构。有着与Martini架构相似但
 
 ## 内容
 
-- [Installation](#installation)
-- [Prerequisite](#prerequisite)
-- [Quick start](#quick-start)
-- [Benchmarks](#benchmarks)
-- [Gin v1.stable](#gin-v1-stable)
-- [Build with jsoniter](#build-with-jsoniter)
-- [API Examples](#api-examples)
+- [安装](#installation)
+- [依赖](#prerequisite)
+- [快速启动](#quick-start)
+- [性能基准测试](#benchmarks)
+- [Gin v1. 稳定版](#gin-v1-stable)
+- [使用 jsoniter 构建](#build-with-jsoniter)
+- [API 示例](#api-examples)
     - [Using GET,POST,PUT,PATCH,DELETE and OPTIONS](#using-get-post-put-patch-delete-and-options)
     - [Parameters in path](#parameters-in-path)
     - [Querystring parameters](#querystring-parameters)
@@ -65,8 +65,8 @@ Gin是一个用Go(Golang)编写的网络架构。有着与Martini架构相似但
     - [http2 server push](#http2-server-push)
     - [Define format for the log of routes](#define-format-for-the-log-of-routes)
     - [Set and get a cookie](#set-and-get-a-cookie)
-- [Testing](#testing)
-- [Users](#users)
+- [测试](#testing)
+- [使用者](#users)
 
 ## 安装
 
@@ -1782,7 +1782,7 @@ func main() {
 }
 ```
 
-Using the command `curl` command result:
+使用指令 `curl` 可获得结果：
 
 ```
 $ curl "http://localhost:8080/getb?field_a=hello&field_b=world"
@@ -1793,7 +1793,7 @@ $ curl "http://localhost:8080/getd?field_x=hello&field_d=world"
 {"d":"world","x":{"FieldX":"hello"}}
 ```
 
-**NOTE**: NOT support the follow style struct:
+**注意**: 不支持下列形式的结构体：
 
 ```go
 type StructX struct {
@@ -1809,12 +1809,11 @@ type StructZ struct {
 }
 ```
 
-In a word, only support nested custom struct which have no `form` now.
+换句话而言，只支持嵌套没有 `form` 的自定义结构体。
 
-### Try to bind body into different structs
+### 尝试绑定主体到不同的结构体中
 
-The normal methods for binding request body consumes `c.Request.Body` and they
-cannot be called multiple times.
+一般绑定request body的方法是使用到`c.Request.Body` 但这个方法不允许被多次调用。
 
 ```go
 type formA struct {
@@ -1828,10 +1827,10 @@ type formB struct {
 func SomeHandler(c *gin.Context) {
   objA := formA{}
   objB := formB{}
-  // This c.ShouldBind consumes c.Request.Body and it cannot be reused.
+  // 这一个c.ShouldBind会使用到c.Request.Body方法，而且该方法不能被重复使用。
   if errA := c.ShouldBind(&objA); errA == nil {
     c.String(http.StatusOK, `the body should be formA`)
-  // Always an error is occurred by this because c.Request.Body is EOF now.
+  // 这里总会发生错误因为c.Request.Body已经EOF。
   } else if errB := c.ShouldBind(&objB); errB == nil {
     c.String(http.StatusOK, `the body should be formB`)
   } else {
@@ -1840,19 +1839,19 @@ func SomeHandler(c *gin.Context) {
 }
 ```
 
-For this, you can use `c.ShouldBindBodyWith`.
+对于这个问题，你可以使用`c.ShouldBindBodyWith`。
 
 ```go
 func SomeHandler(c *gin.Context) {
   objA := formA{}
   objB := formB{}
-  // This reads c.Request.Body and stores the result into the context.
+  // 把c.Request.Body的结果存储到上下文中
   if errA := c.ShouldBindBodyWith(&objA, binding.JSON); errA == nil {
     c.String(http.StatusOK, `the body should be formA`)
-  // At this time, it reuses body stored in the context.
+  // 此时，该方法将会重复利用到存储在上下文的主体
   } else if errB := c.ShouldBindBodyWith(&objB, binding.JSON); errB == nil {
     c.String(http.StatusOK, `the body should be formB JSON`)
-  // And it can accepts other formats
+  // 可以接受其他种格式
   } else if errB2 := c.ShouldBindBodyWith(&objB, binding.XML); errB2 == nil {
     c.String(http.StatusOK, `the body should be formB XML`)
   } else {
@@ -1861,17 +1860,14 @@ func SomeHandler(c *gin.Context) {
 }
 ```
 
-* `c.ShouldBindBodyWith` stores body into the context before binding. This has
-a slight impact to performance, so you should not use this method if you are
-enough to call binding at once.
-* This feature is only needed for some formats -- `JSON`, `XML`, `MsgPack`,
-`ProtoBuf`. For other formats, `Query`, `Form`, `FormPost`, `FormMultipart`,
-can be called by `c.ShouldBind()` multiple times without any damage to
-performance (See [#1341](https://github.com/gin-gonic/gin/pull/1341)).
+* `c.ShouldBindBodyWith` 会在绑定之前吧主体储存在上下文当中。这个方法会对性能有轻微的影响，所以如果能一次过调用绑定已经足够的情况下不需要用到这个方式。
+* 这个特性仅在某些格式中需要用到如 -- `JSON`, `XML`, `MsgPack`,
+`ProtoBuf`. 对于其他格式如, `Query`, `Form`, `FormPost`, `FormMultipart`,
+可以被 `c.ShouldBind()`调用多次而不会造成性能损失 (参考 [#1341](https://github.com/gin-gonic/gin/pull/1341)).
 
 ### http2 server push
 
-http.Pusher is supported only **go1.8+**. See the [golang blog](https://blog.golang.org/h2push) for detail information.
+http.Pusher仅支持 **go1.8+**. 查看 [golang blog](https://blog.golang.org/h2push)可获得详细信息。
 
 [embedmd]:# (examples/http-pusher/main.go go)
 ```go
@@ -1903,7 +1899,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		if pusher := c.Writer.Pusher(); pusher != nil {
-			// use pusher.Push() to do server push
+			// 使用 pusher.Push() 去完成server push
 			if err := pusher.Push("/assets/app.js", nil); err != nil {
 				log.Printf("Failed to push: %v", err)
 			}
@@ -1918,17 +1914,18 @@ func main() {
 }
 ```
 
-### Define format for the log of routes
+### 定义路由器日志的格式
 
-The default log of routes is:
+路由器的默认日志是：
 ```
 [GIN-debug] POST   /foo                      --> main.main.func1 (3 handlers)
 [GIN-debug] GET    /bar                      --> main.main.func2 (3 handlers)
 [GIN-debug] GET    /status                   --> main.main.func3 (3 handlers)
 ```
 
-If you want to log this information in given format (e.g. JSON, key values or something else), then you can define this format with `gin.DebugPrintRouteFunc`.
-In the example below, we log all routes with standard log package but you can use another log tools that suits of your needs.
+
+如果您想以给定的格式记录此信息（比如JSON, key values或其他等等），你可以使用`gin.DebugPrintRouteFunc`.去定义这些格式。
+在下面例子中我们会以标准日志包记录日志，但你可以使用其他日志工具去适配你的需求。
 ```go
 import (
 	"log"
@@ -1960,7 +1957,7 @@ func main() {
 }
 ```
 
-### Set and get a cookie
+### 设置与获取cookie
 
 ```go
 import (
@@ -1990,9 +1987,9 @@ func main() {
 ```
 
 
-## Testing
+## 测试
 
-The `net/http/httptest` package is preferable way for HTTP testing.
+`net/http/httptest` 包是HTTP测试的可选方法之一
 
 ```go
 package main
@@ -2011,7 +2008,7 @@ func main() {
 }
 ```
 
-Test for code example above:
+测试上述的代码示例：
 
 ```go
 package main
@@ -2036,13 +2033,13 @@ func TestPingRoute(t *testing.T) {
 }
 ```
 
-## Users
+## 使用者们
 
-Awesome project lists using [Gin](https://github.com/gin-gonic/gin) web framework.
+使用 [Gin](https://github.com/gin-gonic/gin) web 框架的酷炫项目清单：.
 
-* [drone](https://github.com/drone/drone): Drone is a Continuous Delivery platform built on Docker, written in Go.
-* [gorush](https://github.com/appleboy/gorush): A push notification server written in Go.
-* [fnproject](https://github.com/fnproject/fn): The container native, cloud agnostic serverless platform.
-* [photoprism](https://github.com/photoprism/photoprism): Personal photo management powered by Go and Google TensorFlow.
-* [krakend](https://github.com/devopsfaith/krakend): Ultra performant API Gateway with middlewares.
-* [picfit](https://github.com/thoas/picfit): An image resizing server written in Go.
+* [drone](https://github.com/drone/drone): Drone使用Go编写的基于Docker的连续交付平台。
+* [gorush](https://github.com/appleboy/gorush): 使用GO编写的推送式通知服务器。
+* [fnproject](https://github.com/fnproject/fn): 原生的容器，cloud agnostic无服务器平台。
+* [photoprism](https://github.com/photoprism/photoprism): Go 和 Google TensorFlow提供技术支持的私人相册管理工具。
+* [krakend](https://github.com/devopsfaith/krakend): 具有中间件的超性能API网关。
+* [picfit](https://github.com/thoas/picfit): 用Go编写的图像调整服务器。
