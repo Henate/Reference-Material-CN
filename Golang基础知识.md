@@ -2,6 +2,71 @@
 
 
 ## Golang包管理
+## 工作环境
+windows下查看go环境变量: 
+```
+#win+R -> cmd -> go env
+```
+
+windows下修改go环境变量:
+```
+#系统属性 -> 高级 -> 环境变量
+#修改环境变量为当前工程文件的上一级目录
+
+```
+
+### 同级目录
+
+> .go文件放在相同目录文件夹中
+
+同级目录中的.go文件,包名需要一致:
+```
+#目录Example_file中所有.go文件开头第一行均为:
+package Example_pack
+```
+
+同级目录中的.go文件可直接调用同级目录其他文件的function无需带包名:
+```
+#file_1.go中定义:
+fun print_log(){
+    fmt.Println("hello world")
+}
+
+#file_2.go中使用:
+fun run(){
+    print_log()
+}
+```
+### 非同级目录
+> .go文件放在不同目录文件夹中
+> 包中成员以名称⾸字母⼤⼩写决定访问权限：
+> 1. public: ⾸字母⼤写，可被包外访问 
+> 2. private: ⾸字母⼩写，仅包内成员可以访问
+
+非同级目录中的.go文件,包名不能相同,以防不知如何调用包内function
+
+包声明及导入
+```
+#main.go中:         //main.go在目录在src/中
+package main
+import (
+    "calc"          //导入需要调用函数所属的包
+)
+func main() {
+    calc.Add(1,2) 
+}
+
+#src/cal/calc.go中      //calc.go在目录在src/cal/中
+package calc
+func Add(var_1, var_2 int)(result int) {     //注:首字母大写才能被包外调用
+    result = var_1 + var_2
+    return
+}
+```
+
+导入包与init()函数
+
+> 当一个包被导入时，如果该包还导入了其它的包，那么会先将其它包导入进来，然后再对这些包中的包级常量和变量进行初始化，接着执行init函数（如果有的话），依次类推。等所有被导入的包都加载完毕了，就会开始对main包中的包级常量和变量进行初始化，然后执行main包中的init函数（如果存在的话），最后执行main函数。
 
 ### 关键字import导入包
 
@@ -185,7 +250,7 @@ a7 := [4][2]int{1: {10, 11}}                              //第一行赋值
 
  1. 切片的基本定义初始化方法与数组一样 
  2. 中括号内无需加任何东西
- 3. 可用make创建**(最常用)**
+ 3. 可用make创建`(最常用)`
 
 ```
 a2 := []int{111, 222}
@@ -235,7 +300,7 @@ s2 := Example_struct{"pis2", 9528}
 s3 := Example_struct{name: "pis3"}
 ```
 
-### ⑦接口 - type
+### 7.接口 - type
 
  1. 接口名一般以er结尾
  2. 接口需要匿名方法为类型定义一个func同名方法以实现
@@ -254,7 +319,7 @@ func (s *Student) SayHi() {
 }
 ```
 
-### ⑧映射 - var / make
+### 8.映射 - var / make
 
 map[keyType]valueType
 
@@ -270,82 +335,75 @@ m2 := make(map[string]interface{}, 4)
 
 
 
-### 变量名重命名格式
+### 9.变量名重命名格式
 格式: type [new_type] [old_type]
 重命名后可直接用new_type作为格式去定义变量,与old_type使用方法完全等效
 
 
 
+## 控制结构
+
+### switch
+switch支持所有相等判断的类型都可以作为测试表达式的条件，包括 int、string、指针等。即switch后面的判断条件可以不仅仅为整形、字符串。还可以是指针。
+
+swtich不需要使用break跳出条件
 
 
-
-
-
-## 工作环境
-windows下查看go环境变量: 
-```
-#win+R -> cmd -> go env
-```
-
-windows下修改go环境变量:
-```
-#系统属性 -> 高级 -> 环境变量
-#修改环境变量为当前工程文件的上一级目录
-
-```
-
-### 同级目录
-
-> .go文件放在相同目录文件夹中
-
-同级目录中的.go文件,包名需要一致:
-```
-#目录Example_file中所有.go文件开头第一行均为:
-package Example_pack
-```
-
-同级目录中的.go文件可直接调用同级目录其他文件的function无需带包名:
-```
-#file_1.go中定义:
-fun print_log(){
-    fmt.Println("hello world")
-}
-
-#file_2.go中使用:
-fun run(){
-    print_log()
-}
-```
-### 非同级目录
-> .go文件放在不同目录文件夹中
-> 包中成员以名称⾸字母⼤⼩写决定访问权限：
-> 1. public: ⾸字母⼤写，可被包外访问 
-> 2. private: ⾸字母⼩写，仅包内成员可以访问
-
-非同级目录中的.go文件,包名不能相同,以防不知如何调用包内function
-
-包声明及导入
-```
-#main.go中:         //main.go在目录在src/中
-package main
-import (
-    "calc"          //导入需要调用函数所属的包
-)
-func main() {
-    calc.Add(1,2) 
-}
-
-#src/cal/calc.go中      //calc.go在目录在src/cal/中
-package calc
-func Add(var_1, var_2 int)(result int) {     //注:首字母大写才能被包外调用
-    result = var_1 + var_2
-    return
+switch不会自动地去执行下一个分支的代码。
+```go
+switch i {
+        case 0: // 空分支，只有当 i == 0 时才会进入分支
+        case 1:
+                f() // 当 i == 0 时函数不会被调用
 }
 ```
 
-导入包与init()函数
+如果在执行完每个分支的代码后，还希望继续执行后续分支的代码，可以使用 `fallthrough` 关键字来达到目的。
+```go
+switch i {
+        case 0: fallthrough
+        case 1:
+                f() // 当 i == 0 时函数也会被调用
+}
+```
 
-> 当一个包被导入时，如果该包还导入了其它的包，那么会先将其它包导入进来，然后再对这些包中的包级常量和变量进行初始化，接着执行init函数（如果有的话），依次类推。等所有被导入的包都加载完毕了，就会开始对main包中的包级常量和变量进行初始化，然后执行main包中的init函数（如果存在的话），最后执行main函数。
+### for
+
+#### 与C语言不同点
+
+* 关键字`for`后的条件无需使用括号
+
+```go
+
+   for i := 0; i < 5; i++ {
+                fmt.Printf("This is the %d iteration\n", i)
+   }
+```
+
+* 条件具有平行赋值特性
+
+```go
+for i, j := 0, N; i < j; i, j = i+1, j-1 {} //i与j平行赋值
+```
+
+* 无while关键字，使用for进行无限循环
+```go
+for {
+}
+```
+
+#### for-range 结构
+
+一般形式为：`for idx, val := range Var { }`
+可以通过迭代的方式获取变量Var中的索引idx与值val
+```go
+
+for pos, char := range str {
+...
+}
+```
+
+
 
 ---
 
@@ -357,6 +415,13 @@ func Add(var_1, var_2 int)(result int) {     //注:首字母大写才能被包�
 2. 操作符 "&" 取变量地址， "*" 通过指针访问目标对象 
 3. 不支持指针运算，不支持 "->"运算符，直接⽤ "." 访问目标成员
 4. 申请空间以及赋值,go语言中new后无需释放内存
+
+>定义指针类型
+
+在类型前加上*可以定义该类型的指针
+```go
+var intP *int   //定义指向int类型的指针
+```
 
 >使用new创建内存空间
 ```
@@ -381,9 +446,9 @@ func main() {
 
 ```
 
-###数组
+### 数组
 
-####数组声明
+#### 数组声明
 一维数组声明
 ```
 func array() {
@@ -419,7 +484,7 @@ func array() {
 	array_d := [3][4]int{1: {4, 5, 6, 7}, {8, 9, 10, 11}}
 	fmt.Println("array_a: ", array_d)
 ```
-####数组比较
+#### 数组比较
 只能使用 == 和 != 比较,返回值:true/false
 ```
 	array_a := [3][4]int{{1, 2, 3, 4}, {4, 5, 6, 7}, {8, 9, 10, 11}}
@@ -427,7 +492,7 @@ func array() {
 	fmt.Println("array_a ==  array_a_compare", array_a == array_a_compare)
 ```
 
-####算法
+#### 算法
 生成随机数
 ```
 import (
@@ -444,7 +509,7 @@ func main() {
 
 ```
 
-###切片slice
+### 切片slice
 >slice和数组的区别：声明数组时，方括号内写明了数组的长度或使用...自动计算长度，而声明slice时，方括号内没有任何字符。
 
 ####切片的创建
@@ -460,7 +525,7 @@ func main() {
 	fmt.Println("s2:", s2, "len:", len(s2), "cap:", cap(s2))
 ```
 
-####切片截取
+#### 切片截取
 > 格式: slice_cut := array[low:high:max]
 
 |操作           | 描述| 
@@ -496,7 +561,7 @@ func main() {
 	slice_modify_var[2] = 666
 ```
 
-####向slice末尾追加参数
+#### 向slice末尾追加参数
 >格式: append(slice, var_1, var_XX)
 ```
     //使用append向切片末尾追加
@@ -505,7 +570,7 @@ func main() {
 ```
 >append函数会智能地底层数组的容量增长，一旦超过原底层数组容量，通常以2倍容量重新分配底层数组，并复制原来的数据：
 
-####复制slice
+#### 复制slice
 > 格式: copy(dst_slice, src_slice)
 > 函数 copy 在两个 slice 间复制数据，复制⻓度以 len 小的为准，两个 slice 可指向同⼀底层数组。
 
@@ -518,7 +583,7 @@ func modify_slice(sl []int) {
 }
 ```
 
-###map
+### map
 >格式 map[keyType]valueType
 
 在函数间传递映射并不会制造出该映射的一个副本，不是值传递，而是**引用传递**
@@ -535,7 +600,7 @@ func modify_slice(sl []int) {
 ```
  
 
-###结构体
+### 结构体
 >定义格式: 
 >type struct_name struct{}
 
@@ -595,7 +660,7 @@ func struct_init() {
 }
 ```
 
-##面向对象编程
+## 面向对象编程
 
 >  1. 封装：通过方法实现 
 >  2. 继承：通过匿名字段实现 
@@ -674,7 +739,7 @@ func call_Add_sum() {
 }
 ```
 
-####2.为结构体添加方法
+#### 2.为结构体添加方法
 结构体通常会使用type重定义结构体名字，可使用作ReceiverType
 ```
 type sample_struct struct {
@@ -693,7 +758,7 @@ func call_Modify_struct() {
 }
 ```
 
-####3.值语义:值作receiver / 引用语义:指针作receiver
+#### 3.值语义:值作receiver / 引用语义:指针作receiver
 值语义即传参为值,不会修改参数的内容,而使用引用语义并修改后,参数的内容会一并更改
 ```
 //ReceiverType为值类型
@@ -709,7 +774,7 @@ func (obj_struct *sample_struct) ModifyStructInfo(id int, name string, sex byte)
 }
 ```
 
-####4.继承来自匿名字段的方法
+#### 4.继承来自匿名字段的方法
 如果匿名字段实现了一个方法，那么包含这个匿名字段的struct也能调用该方法。
 ```
 type sample_struct struct {
@@ -734,7 +799,7 @@ func student_init() {
 }
 ```
 
-####5.方法的重写
+#### 5.方法的重写
 
 当ReceiverType使用同名方法,会调用重写后的方法。而通过显式调用则可调用重写前的方法
 ```
@@ -765,7 +830,7 @@ func student_init() {
 	s1.sample_struct.PrintStructInfo()      //显式调用
 ```
 
-####6.方法值&方法表达式
+#### 6.方法值&方法表达式
 方法值:隐式传参
 方法表达式:显式传参
 
@@ -817,7 +882,7 @@ func call_func() {
 
 > - 多态：调用同一个函数,表现出不同的功能,即多种形态。
 
-####2.切片多态
+#### 2.切片多态
 使用切片有效管理方法
 ```
 //创建切片指向结构体以使用方法
@@ -833,7 +898,7 @@ for _, i := range slic {
 }
 ```
 
-####3.函数多态
+#### 3.函数多态
 使用函数的方法灵活调用方法
 ```
 func call_interface(obj sampler) {
@@ -850,7 +915,7 @@ func call_func() {
 }
 ```
 
-####空接口
+#### 空接口
 > 格式: type inter interface {} (大括号内不加方法)
 
  > - 空接口可指向任何类型变量
@@ -866,9 +931,9 @@ var v5 interface{} = &struct{ X int }{1}
 ```
 
 
-##异常处理 
+## 异常处理 
 
-###一、errors.go
+### 一、errors.go
 >- Go语言引入了一个关于错误处理的标准模式，即error接口，它是Go语言内建的接口类型
 >- 处理非致命错误
 
@@ -901,7 +966,7 @@ func main() {
 	}
 ```
 
-###二、panic
+### 二、panic
 
 >- 格式: func panic(v interface{})
 >- 处理致命错误
@@ -924,7 +989,7 @@ func panic_example(){
 }
 ```
 
-###三、recover
+### 三、recover
 > - 格式: func recover() interface{}
 > - recover使当前的程序从运行时panic的状态中恢复并重新获得流程控制权。
 
@@ -942,11 +1007,11 @@ defer func() {
 
 
 
-##字符串处理
+## 字符串处理
 
-###一、字符串操作
+### 一、字符串操作
 
-####1.Contains - 查包含
+#### 1.Contains - 查包含
 func Contains(s, substr string) bool
 功能：字符串s中是否包含substr，返回bool值
 
@@ -955,7 +1020,7 @@ fmt.Println(strings.Contains("seafood", "foo"))
 ```
 
 
-####2.Join - 拼接字符串
+#### 2.Join - 拼接字符串
 func Join(a []string, sep string) string
 功能：字符串链接，把slice a通过sep链接起来
 
@@ -965,7 +1030,7 @@ fmt.Println(strings.Join(s, ", "))
 //运行结果:foo, bar, baz
 ```
 
-####3.Index - 查字符串中特定字符位置
+#### 3.Index - 查字符串中特定字符位置
 func Index(s, sep string) int
 功能：在字符串s中查找sep所在的位置，返回位置值，找不到返回-1
 
@@ -973,7 +1038,7 @@ func Index(s, sep string) int
 fmt.Println(strings.Index("chicken", "ken"))
 ```
 
-####4.Repeat - 重复打印字符串
+#### 4.Repeat - 重复打印字符串
 func Repeat(s string, count int) string
 功能：重复s字符串count次，最后返回重复的字符串
 
@@ -982,7 +1047,7 @@ fmt.Println("ba" + strings.Repeat("na", 2))
 //运行结果:banana
 ```
 
-####5.Replace - 替换字符串中特定字符
+#### 5.Replace - 替换字符串中特定字符
 func Replace(s, old, new string, n int) string
 功能：在s字符串中，把old字符串替换为new字符串，n表示替换的次数，小于0表示全部替换
 
@@ -994,7 +1059,7 @@ fmt.Println(strings.Replace("oink oink oink", "oink", "moo", -1))
 //moo moo moo
 ```
 
-####6.Fields - 去除字符串中所有空格
+#### 6.Fields - 去除字符串中所有空格
 func Fields(s string) []string
 功能：去除s字符串的空格符，并且按照空格分割返回slice
 
@@ -1003,7 +1068,7 @@ fmt.Printf("Fields are: %q", strings.Fields("  foo bar  baz   "))
 //运行结果:Fields are: ["foo" "bar" "baz"]
 ```
 
-####7.Split - 以特定字符分割字符串
+#### 7.Split - 以特定字符分割字符串
 func Split(s, sep string) []string
 功能：把s字符串按照sep分割，返回slice
 
@@ -1011,7 +1076,7 @@ func Split(s, sep string) []string
     fmt.Printf("%q\n", strings.Split("a,b,c", ","))
 ```
 
-####8.Trim - 去除字符串头尾空格
+#### 8.Trim - 去除字符串头尾空格
 func Trim(s string, cutset string) string
 功能：在s字符串的头部和尾部去除cutset指定的字符串
 
@@ -1020,11 +1085,11 @@ func Trim(s string, cutset string) string
     //运行结果:["Achtung"]
 ```
 
-###二、字符串转换
+### 二、字符串转换
 
 转换方法在包"strconv"中
 
-####1.Append - 向数组追加各种类型变量
+#### 1.Append - 向数组追加各种类型变量
 Append 系列函数将整数等转换为字符串后，添加到现有的字节数组中。
 
 ```
@@ -1036,7 +1101,7 @@ str = strconv.AppendQuoteRune(str, '单')    //以byte类型方式追加
 fmt.Println(string(str))                    //4567false"abcdefg"'单'
 ```
 
-####2. Format
+#### 2. Format
 Format 系列函数把其他类型的转换为字符串。
 
 ```
@@ -1047,7 +1112,7 @@ d := strconv.Itoa(1023)                 //整形转字符串
 fmt.Println(a, b, c, d)                 //false 1234 12345 1023
 ```
 
-####3.Parse 
+#### 3.Parse 
 Parse 系列函数把字符串转换为其他类型。
 
 ```
@@ -1071,7 +1136,7 @@ func Parse_sth(){
 }
 ```
 
-####4.正则表达式
+#### 4.正则表达式
 包:"regexp"
 
 注: 字符串处理我们可以使用strings包来进行搜索(Contains、Index)、替换(Replace)和解析(Split、Join)等操作，但是这些都是简单的字符串操作，他们的搜索都是大小写敏感，而且固定的字符串，如果需要匹配可变的那种就没办法实现
@@ -1081,7 +1146,7 @@ func Parse_sth(){
 
 
 
-##Json
+## Json
 
 包:"encoding/json"
 
@@ -1101,8 +1166,8 @@ func Marshal(v interface{}) ([]byte, error)
 func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error
 ```
 
-###一、生成Json
-####①结构体生成json
+### 一、生成Json
+#### ①结构体生成json
 ```
 //结构体变量首字母必须大写
 type Json_struct struct {
@@ -1133,7 +1198,7 @@ func main() {
 
 ```
 
-####②字典map生成json
+#### ②字典map生成json
 
 ```
 m1 := make(map[string]interface{}, 4)
@@ -1151,7 +1216,7 @@ if err != nil {
 fmt.Println("json:", string(j_buf))
 ```
 
-###二、解码JSON
+### 二、解码JSON
 使用json.Unmarshal()函数将JSON格式的文本解码为Go里面预期的数据结构。
 
 json.Unmarshal()函数的原型：
@@ -1160,7 +1225,7 @@ json.Unmarshal()函数的原型：
 ```
 该函数的第一个参数是输入，即JSON格式的文本（比特序列），第二个参数表示目标输出容器，用于存放解码后的值。
 
-####①.结构体接收解码
+#### ①.结构体接收解码
 
 ```
 	decode_json := []byte(`{
@@ -1184,7 +1249,7 @@ json.Unmarshal()函数的原型：
 	fmt.Println("uj_buf: ", uj_buf)
 ```
 
-####字段map接收解码
+#### 字段map接收解码
 
 不及结构体输出简单,但解码方便.
 
@@ -1218,11 +1283,11 @@ for _, value := range m {
 ```
 
 
-##文件操作
+## 文件操作
 
-###一、创建文件
+### 一、创建文件
 
-####新建文件两个方法
+#### 新建文件两个方法
 ```
 //根据提供的文件名创建新的文件，返回一个文件对象，默认权限是0666的文件，返回的文件对象是可读写的。
 func Create(name string) (file *File, err Error)
@@ -1230,7 +1295,7 @@ func Create(name string) (file *File, err Error)
 //根据文件描述符创建相应的文件，返回一个文件对象
 func NewFile(fd uintptr, name string) *File
 ```
-####打开文件两个方法
+#### 打开文件两个方法
 ```
 //该方法打开一个名称为name的文件，但是是只读方式，内部实现其实调用了OpenFile。
 func Open(name string) (file *File, err Error)
@@ -1239,7 +1304,7 @@ func Open(name string) (file *File, err Error)
 func OpenFile(name string, flag int, perm uint32) (file *File, err Error)
 ```
 
-###二、写文件
+### 二、写文件
 
 ```
 //写入byte类型的信息到文件
@@ -1252,7 +1317,7 @@ func (file *File) WriteAt(b []byte, off int64) (n int, err Error)
 func (file *File) WriteString(s string) (ret int, err Error)
 ```
 
-###三、读文件
+### 三、读文件
 
 ```
 //读取数据到b中
@@ -1264,7 +1329,7 @@ func (file *File) ReadAt(b []byte, off int64) (n int, err Error)
 
 ```
 
-###四、实例
+### 四、实例
 ```
 func main() {
     args := os.Args //获取用户输入的所有参数
@@ -1323,7 +1388,7 @@ func main() {
 
 ```
 
-##并发编程
+## 并发编程
 
 并行与并发:
 
@@ -1332,7 +1397,7 @@ func main() {
  - 主goroutine(即main函数)退出后，其它的工作goroutine也会自动退出
  
  
-###一、goroutine
+### 一、goroutine
 包 "runtime"
 一般方式
 ```
@@ -1348,7 +1413,7 @@ func main() {
  
 
 
-####①.runtime.Gosched()
+#### ①.runtime.Gosched()
 用于让出CPU时间片，让出当前goroutine的执行权限，调度器安排其他等待的任务运行，并在下次某个时候从该位置恢复执行。
 
 ```
@@ -1363,7 +1428,7 @@ func main() {
 }
 ```
 
-####②.runtime.Goexit
+#### ②.runtime.Goexit
 ```
 func co_fun() {
 	defer fmt.Println("tyj")
@@ -1379,7 +1444,7 @@ func main() {
 ```
 
 
-####③.GOMAXPROCS
+#### ③.GOMAXPROCS
  设置并行计算的CPU核数的最大值，并返回之前的值。
 
 ```
@@ -1387,13 +1452,13 @@ runtime.GOMAXPROCS(4) //设置4核运行
 ```
 
 
-###二、channel
+### 二、channel
 
  1. 由make创建
  2. 作参时为引用类型
  3. 零值为nil
 
-####①.声明格式
+#### ①.声明格式
  1. capacity = 0 时 channel 为无缓冲阻塞读写
  2. capacity > 0 时 channel 有缓冲、非阻塞的，直到写满capacity个元素才阻塞写入
 ```
@@ -1401,7 +1466,7 @@ make(chan Type) //等价于make(chan Type, 0)
 make(chan Type, capacity)
 ```
 
-####②.使用 <- 赋值
+#### ②.使用 <- 赋值
 channel通过**操作符<-**来接收和发送数据，发送和接收数据语法：
 
     channel <- value      //发送value到channel
@@ -1412,7 +1477,7 @@ channel通过**操作符<-**来接收和发送数据，发送和接收数据语�
 使用<-发送value到channel后,若value没有被接收,则当前goruntine不能往下执行
 即:**value被接收前阻塞留在当前Goruntine中**
 
-####③.无缓冲channel:
+#### ③.无缓冲channel:
 > - 无缓冲的通道（unbuffered channel）是指在接收前没有能力保存任何值的通道。
 
 ```
@@ -1447,7 +1512,7 @@ func main() {
 ```
 
 
-####④有缓冲channel
+#### ④有缓冲channel
 > - 有缓冲的通道（buffered channel）是一种在被接收前能存储一个或者多个值的通道。
 > - 当channel中有缓冲value时,可一边输入一边输入,保持value持续传递.
 
@@ -1472,7 +1537,7 @@ func main() {
 ```
 
 
-####⑤close channel
+#### ⑤close channel
 
  1. channel不需要文件一样需要经常去关闭，当后续无数据需要发送了，或想显式的结束range循环之类的，才去关闭channel；
  2. 关闭channel后，无法向channel再发送数据(引发panic错误后导致接收立即返回零值)
@@ -1498,7 +1563,7 @@ for data := range ch {
 ```
 
 
-####⑥单向channel
+#### ⑥单向channel
 
  1. channel默认为双向 
  2. 可声明单项chanel
@@ -1516,10 +1581,10 @@ var ch3 <-chan int     // ch3是单向channel，只用于读取int数据
 双向channel 可隐式转换为单向队列，只收或只发，不能将单向channel转换为普通双向channel
 
 
-###三、定时器缓冲channel
+### 三、定时器缓冲channel
 包:"time"
 
-####①.Timer - 定时器
+#### ①.Timer - 定时器
  1. 创建定时器: time.time.NewTimer(seconds)
  2. 定时器阻塞: <- timer.C
  3. 定时器停止: timer.Stop()
@@ -1562,7 +1627,7 @@ for {
 }
 ```
 
-####②.Ticker - 定时触发的计时器
+#### ②.Ticker - 定时触发的计时器
 以一个间隔(interval)往channel发送一个事件(当前时间)，而channel的接收者可以以固定的时间间隔从channel中读取事件。
 ```
 for {
@@ -1574,7 +1639,7 @@ for {
 }
 ```
 
-###四、select - 监听channel
+### 四、select - 监听channel
 
  1. select中每个case语句里必须是一个IO操作
  2. 在一个select中，Go语言会按顺序从头至尾评估每一个发送和接收的语句。
