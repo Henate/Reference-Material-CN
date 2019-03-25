@@ -198,7 +198,7 @@ const beef, two, c = "eat", 2, "veg"
  2. 自动推导
  3. 可使用`new()`指向临时空间
 
-```
+```go
 #普通定义&自动推导
 var p1 *string = &v2    //格式为*string, 使用前需要明确知道右值是什么类型
 var p2 = &v2            //直接推导右值类型赋值到p2
@@ -328,7 +328,8 @@ map[keyType]valueType
 var m1 map[string]int
 ```
 
-```
+使用make定义
+``` 
 //make(map, cap)
 m2 := make(map[string]interface{}, 4)
 ```
@@ -336,7 +337,7 @@ m2 := make(map[string]interface{}, 4)
 
 
 ### 9.变量名重命名格式
-格式: type [new_type] [old_type]
+格式: `type [new_type] [old_type]`    
 重命名后可直接用new_type作为格式去定义变量,与old_type使用方法完全等效
 
 
@@ -404,6 +405,151 @@ for pos, char := range str {
 ```
 
 
+## 函数
+    
+### 特性
+
+* Go是编译型语言，所以函数编写的顺序是无关紧要的。顺序不影响互相调用。
+
+* 可返回多个返回值
+
+* 多个返回值作另一函数实参
+假设` f1 `需要 3 个参数` f1(a, b, c int)`，同时` f2` 返回 3 个参数 `f2(a, b int) (int, int, int)`，就可以这样调用 f1：`f1(f2(a, b))`。
+```go
+func threeArgReturn() (i, j, k int) { 
+    return 1, 2, 3
+}
+
+func threeArgInput(x, y, z int) { 
+    fmt.Println("result:", x+y+z)
+}
+
+func main() {
+    threeArgInput(threeArgReturn())
+}       
+```
+
+* 不支持函数重载（function overloading）因此每个函数名字需要独立。
+* 没有形参的名字，只有形参类型的函数通常被称为 niladic 函数（niladic function），就像 func f(int, int, float64)
+```go
+func getX2AndX3(input int) (int, int) {     //返回值不用明确具体名字
+    return 2 * input, 3 * input                 //直接返回形参值  
+}
+```
+
+
+### 按值传递（call by value） 按引用传递（call by reference）
+默认情况下GO传递参数方式为按值传递(即传递副本)。但传递指针（一个32位或者64位的值）的消耗都比传递副本来得少
+
+
+在函数调用时，像切片（slice）、字典（map）、接口（interface）、通道（channel）这样的引用类型都是默认使用引用传递（即使没有显式的指出指针）。
+
+### 命名作返回值（named return variables）
+
+返回值在函数中已有初始化，当调用return时可直接返回值。
+PS：需要有确定的返回形参名
+```go
+func getX2AndX3_2(input int) (x2 int, x3 int) {
+    x2 = 2 * input
+    x3 = 3 * input
+    // return x2, x3
+    return
+}
+```
+
+### 函数通过指针修改变量值
+
+当指针作函数的参数时，在函数内部可以通过修改指针指向的值修改某变量值。
+```go
+// this function changes reply:
+func Multiply(a, b int, reply *int) {
+    *reply = a * b
+}
+```
+
+### 传递变长参数
+
+#### 变长参数简析
+* WHAT
+函数接收 0~N 个参数
+* WHY？
+当一个函数不确定需要接收多少个参数时，可使用变长参数。
+* HOW?
+使用 `...ArgType` 作为变长参数的类型
+```go
+func myFunc(a, b, arg ...int) {}
+```
+
+#### 往形参为变长参数的函数传值
+
+* 若变长参数都为同一个类型，使用切片slice作为参数类型
+
+如：`func(slice...)`
+```go
+
+func main() {
+        x := min(1, 3, 2, 0)
+        fmt.Printf("The minimum is: %d\n", x)
+        slice := []int{7,9,3,5,1}
+        x = min(slice...)
+        fmt.Printf("The minimum in the slice is: %d", x)
+}
+
+func min(s ...int) int {
+        if len(s)==0 {
+                return 0
+        }
+        min := s[0]
+        for _, v := range s {
+                if v < min {
+                        min = v
+                }
+        }
+        return min
+}
+```
+
+* 若变长参数为非同一个类型，可使用结构体/空接口作为参数类型
+
+1. 使用结构体：定义一个结构类型，假设它叫 Options，用以存储所有可能的参数：
+```go
+type Options struct {
+
+        par1 type1,
+        par2 type2,
+        ...
+}
+```
+函数 F1 可以使用正常的参数 a 和 b，以及一个没有任何初始化的 Options 结构： `F1(a, b, Options {})`。如果需要对选项进行初始化，则可以使用 `F1(a, b, Options {par1:val1, par2:val2})`。
+
+2. 使用空接口：如果一个变长参数的类型没有被指定，则可以使用默认的空接口 interface{}，这样就可以接受任何类型的参数（详见第 11.9 节）。该方案不仅可以用于长度未知的参数，还可以用于任何不确定类型的参数。一般而言我们会使用一个 `for-range` 循环以及 switch 结构对每个参数的类型进行判断：
+```go
+func typecheck(..,..,values … interface{}) {
+
+        for _, value := range values {
+                switch v := value.(type) {
+                        case int: …
+                        case float: …
+                        case string: …
+                        case bool: …
+                        default: …
+                }
+        }
+}
+```
+
+
+### 内置函数
+
+| 名称 | 说明 |
+| --- | --- |
+| close | 用于关闭管道通信 |
+| len、cap | len 用于返回某个类型的长度或数量（字符串、数组、切片、map 和管道）；cap 是容量的意思，用于返回某个类型的最大容量（只能用于切片和 map） |
+| new、make |  new 和 make 均是用于分配内存：new 用于值类型和用户定义的类型，如自定义结构，make 用于内置引用类型（切片、map 和管道）。它们的用法就像是函数，但是将类型作为参数：new(type)、make(type)。new(T) 分配类型 T 的零值并返回其地址，也就是指向类型 T 的指针（详见第 10.1 节）。它也可以被用于基本类型：v := new(int)。make(T) 返回类型 T 的初始化之后的值，因此它比 new 进行更多的工作。new() 是一个函数，不要忘记它的括号|
+| copy、append |用于复制和连接切片  |
+| panic、recover |均用于错误处理机制  |
+| print、println | 底层打印函数，在部署环境中建议使用 fmt 包 |
+| complex、real imag | 用于创建和操作复数 |
 
 ---
 
