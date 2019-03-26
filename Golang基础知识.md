@@ -580,6 +580,31 @@ func fibonacci(n int) (res int) {
 }    
 ```
 
+### 匿名函数/闭包
+
+定义一个函数但不定义函数名，称为匿名函数。
+
+有两种定义匿名函数的方式：
+使用变量接收匿名函数的地址，通过调用变量使用匿名函数。
+
+1. 往变量传值使用匿名函数
+```go
+func main() { 
+    AnonyAdd := func(x, y int) int { return x + y } 
+    fmt.Println(AnonyAdd(3, 4))
+    }
+```
+
+2. 定义匿名函数后在括号()中赋值
+```go
+func main() { 
+    AnonyMin := func(j, k int) int {         
+        return j - k 
+    }(6, 3) 
+    fmt.Println(AnonyMin)
+}
+```
+
 ---
 
 ## 复合类型
