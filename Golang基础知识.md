@@ -551,6 +551,35 @@ func typecheck(..,..,values … interface{}) {
 | print、println | 底层打印函数，在部署环境中建议使用 fmt 包 |
 | complex、real imag | 用于创建和操作复数 |
 
+
+### 递归函数
+在一个函数中调用自己，称为函数的递归。
+
+经典递归例子：斐波那契数列
+```go
+
+package main
+
+import "fmt"
+
+func main() {
+        result := 0
+        for i := 0; i <= 10; i++ {
+                result = fibonacci(i)
+                fmt.Printf("fibonacci(%d) is: %d\n", i, result)
+        }
+}
+
+func fibonacci(n int) (res int) {
+        if n <= 1 {
+                res = 1
+        } else {
+                res = fibonacci(n-1) + fibonacci(n-2)
+        }
+        return
+}    
+```
+
 ---
 
 ## 复合类型
