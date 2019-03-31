@@ -191,8 +191,8 @@ var intVar, stringVar = 4, "haha"
 const beef, two, c = "eat", 2, "veg"
 ```
 
-
-### 3.指针 - var / := 
+### 各类型变量定义
+#### 指针变量定义 - var / := 
 
  1. 普通定义
  2. 自动推导
@@ -221,7 +221,7 @@ p6 = &v2
  1. 若使用普通定义需在类型名前加星号*
  2. 右值若是一个变量需要加取地址符&以赋值到指针变量
 
-### 4.数组 - var / := 
+#### 数组变量定义 - var / := 
  1. 普通定义
  2. 自动推导
  3. 可使用`...`不指定数组第一维空间长度
@@ -246,7 +246,7 @@ a6 := [...][2]int{{10, 11}, {20, 21}, {30, 31}, {40, 41}} //第一维可以填..
 a7 := [4][2]int{1: {10, 11}}                              //第一行赋值
 ```
 
-### 5.切片 - var / := / make 
+#### 切片变量定义 - var / := / make 
 
  1. 切片的基本定义初始化方法与数组一样 
  2. 中括号内无需加任何东西
@@ -267,7 +267,7 @@ s2 := make([]int, 5, 10)
 
 
 
-### 6.结构体 - type / var / := 
+#### 结构体变量定义 - type / var / := 
 
  1. 普通定义赋值 - var
  2. 自动推导赋值 struct_name := struct_type{}
@@ -300,7 +300,7 @@ s2 := Example_struct{"pis2", 9528}
 s3 := Example_struct{name: "pis3"}
 ```
 
-### 7.接口 - type
+#### 接口变量定义 - type
 
  1. 接口名一般以er结尾
  2. 接口需要匿名方法为类型定义一个func同名方法以实现
@@ -319,7 +319,7 @@ func (s *Student) SayHi() {
 }
 ```
 
-### 8.映射 - var / make
+#### 映射变量定义 - var / make
 
 map[keyType]valueType
 
@@ -336,7 +336,7 @@ m2 := make(map[string]interface{}, 4)
 
 
 
-### 9.变量名重命名格式
+### 变量名重命名格式
 格式: `type [new_type] [old_type]`    
 重命名后可直接用new_type作为格式去定义变量,与old_type使用方法完全等效
 
@@ -580,8 +580,8 @@ func fibonacci(n int) (res int) {
 }    
 ```
 
-### 匿名函数/闭包
-
+### 闭包
+#### 匿名函数
 定义一个函数但不定义函数名，称为匿名函数。
 
 有两种定义匿名函数的方式：
@@ -602,6 +602,28 @@ func main() {
         return j - k 
     }(6, 3) 
     fmt.Println(AnonyMin)
+}
+```
+
+#### 高阶函数-函数返回值为一个函数
+
+* 特性：闭包函数内的变量值不变
+
+闭包函数保存并积累其中的变量的值，不管外部函数退出与否，它都能够继续操作外部函数中的局部变量。
+```go
+func main() {
+        var f = Adder()
+        fmt.Print(f(1), " - ")
+        fmt.Print(f(20), " - ")
+        fmt.Print(f(300))
+}
+
+func Adder() func(int) int {
+        var x int
+        return func(delta int) int {
+                x += delta
+                return x
+        }
 }
 ```
 
@@ -712,7 +734,7 @@ func main() {
 ### 切片slice
 >slice和数组的区别：声明数组时，方括号内写明了数组的长度或使用...自动计算长度，而声明slice时，方括号内没有任何字符。
 
-####切片的创建
+#### 切片的创建
 > 格式: slice := array[type, len, cap]
 
 与数组相似,但中括号[]内无需填长度。
