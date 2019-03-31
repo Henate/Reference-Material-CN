@@ -236,7 +236,7 @@ p6 = &v2
 	}
 ```
 
-直接推导,可以用大括号{}赋值初始化数组
+直接推导,且可以用大括号{}赋值初始化数组
 ```
 a2 := [3]int{111, 222}
 a4 := [...]int{111, 222, 333, 444} //通过初始化值确定数组长度为4
@@ -344,7 +344,7 @@ m2 := make(map[string]interface{}, 4)
 
 ## 控制结构
 
-### switch
+### switch语句
 switch支持所有相等判断的类型都可以作为测试表达式的条件，包括 int、string、指针等。即switch后面的判断条件可以不仅仅为整形、字符串。还可以是指针。
 
 swtich不需要使用break跳出条件
@@ -368,7 +368,7 @@ switch i {
 }
 ```
 
-### for
+### for语句
 
 #### 与C语言不同点
 
@@ -443,6 +443,17 @@ func getX2AndX3(input int) (int, int) {     //返回值不用明确具体名字
 
 
 在函数调用时，像切片（slice）、字典（map）、接口（interface）、通道（channel）这样的引用类型都是默认使用引用传递（即使没有显式的指出指针）。
+
+### new() 和 make() 的区别
+
+看起来二者没有什么区别，都在堆上分配内存，但是它们的行为不同，适用于不同的类型。
+
+1. new(T) 为每个新的类型T分配一片内存，初始化为 0 并且返回类型为`*T`的内存地址：这种方法 返回一个指向类型为 T，值为 0 的地址的指针，它适用于值类型如数组和结构体（参见第 10 章）；它相当于 &T{}。
+2. make(T, len, cap) 返回一个类型为 T 的初始值，它只适用于3种内建的引用类型：切片、map 和 channel（参见第 8 章，第 13 章）。
+
+换言之，new 函数分配内存，make 函数初始化；下图给出了区别：
+![75bfdaf82084cf313f14a4b69bd82a18.png](en-resource://database/456:0)
+
 
 ### 命名作返回值（named return variables）
 
@@ -670,6 +681,12 @@ func main() {
 
 ### 数组
 
+#### 数组特性
+* 数组为值类型
+    * 可以使用new()进行变量定义：`var Arry = new([5]int)`
+    * 使用数组作函数参数时传递为数组值：`func1(arr2)`
+    * 使用&操作符使数组以引用方式传递：`func1(&arr2)`
+
 #### 数组声明
 一维数组声明
 ```
@@ -732,10 +749,18 @@ func main() {
 ```
 
 ### 切片slice
->slice和数组的区别：声明数组时，方括号内写明了数组的长度或使用...自动计算长度，而声明slice时，方括号内没有任何字符。
+
+#### 切片特性
+* slice和数组的区别：
+    * 声明数组时，方括号内写明了数组的长度或使用...自动计算长度
+    * 声明slice时，方括号内没有任何字符。
+* 切片的长度永远不会超过它的容量，所以对于 切片 s 来说该不等式永远成立：0 <= len(s) <= cap(s)
+* 一个切片在未初始化之前默认为 nil，长度为 0
+* 绝对不要用指针指向 slice。切片本身已经是一个引用类型，所以它本身就是一个指针.
+
 
 #### 切片的创建
-> 格式: slice := array[type, len, cap]
+ 格式: `slice := array[type, len, cap]`
 
 与数组相似,但中括号[]内无需填长度。
 ```
@@ -747,8 +772,24 @@ func main() {
 	fmt.Println("s2:", s2, "len:", len(s2), "cap:", cap(s2))
 ```
 
+#### 从数组中获取切片值
+
+1. 使用操作符` :`表示取得数组的所有数值：`var slice1 []type = arr1[:]`
+2. 使用`0:len(arryVar)`表示取得数组的所有数值：`arr1[0:len(arr1)]`
+3. 使用切片的引用类型特性直接使用操作符&获取数值的地址：`slice1 = &arr1`
+
+#### 将数组分片为切片传参
+数组为值类型，传参时消耗过大，此时使用分片的方式，可把数组以切片的方式传递参数。
+```go
+func main() {
+        var arr = [5]int{0, 1, 2, 3, 4}
+        sum(arr[:])     //在数组中使用arr[:]可引用该函数
+}
+```
+
+
 #### 切片截取
-> 格式: slice_cut := array[low:high:max]
+ 格式: `slice_cut := array[low : high : max]`
 
 |操作           | 描述| 
 | --------      | -----  |
@@ -762,7 +803,7 @@ func main() {
 |cap(s)	        |切片s的容量，总是>=len(s)| 
 |注:            |len=high-low，cap=max-low| 
 
-直接截取数组或切片
+* 直接截取数组或切片，被截取的切片和数组不会有任何影响
 ```
 	s := []int{11, 22, 33, 44, 88, 55, 66, 98}
 	array := [8]int{11, 22, 33, 44, 88, 55, 66, 98}
@@ -772,7 +813,7 @@ func main() {
 	s3 := array[1:4]
 ```
 
-修改切片截取即修改原值
+* 由于切片为引用类型，修改切片截取值即修改原值
 ```
     //当修改切片截取中的值,原array会一同修改
 	s := []int{11, 22, 33, 44, 88, 55, 66, 98}
@@ -784,7 +825,7 @@ func main() {
 ```
 
 #### 向slice末尾追加参数
->格式: append(slice, var_1, var_XX)
+格式: `append(slice, var_1, var_XX)`
 ```
     //使用append向切片末尾追加
 	slice_array := []int{11}
@@ -796,14 +837,23 @@ func main() {
 > 格式: copy(dst_slice, src_slice)
 > 函数 copy 在两个 slice 间复制数据，复制⻓度以 len 小的为准，两个 slice 可指向同⼀底层数组。
 
-####silce作函数参数
-slice可直接传索引值,只需要把slice名字作参,即可修改值(相当于不带星号*的指针)
+#### silce作函数参数
+slice可直接传索引值,只需要把slice名字作参,即可修改值(相当于不带星号`*`的指针)
 ```
 //函数调用以下func后,slice的值已被改变
 func modify_slice(sl []int) {
 	sl[0]++
 }
 ```
+
+#### []byte 切片
+在go中有bytes包专门用于处理byte类型的切片，可以快速地往切片中追加数值。
+
+定义：`var buffer bytes.Buffer`
+使用new获得buffer指针：`var r *bytes.Buffer = new(bytes.Buffer)`
+或者通过函数：`func NewBuffer(buf []byte) *Buffer`，创建一个 Buffer 对象并且用 buf 初始化好；NewBuffer 最好用在从 buf 读取的时候使用。
+将字符串 s 追加到buffer后面：`buffer.WriteString(s)` 
+转换byte为string类型：`buffer.String()` 
 
 ### map
 >格式 map[keyType]valueType
