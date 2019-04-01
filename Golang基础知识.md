@@ -872,11 +872,42 @@ func modify_slice(sl []int) {
 4. **动态长度：** 声明的时候不需要知道 map 的长度，map 是可以动态增长的，可以使用len()获取当前map中键值对的数目
 5. **性能适中：** 通过 key 在 map 中寻找值是很快的，比线性查找快得多，但是仍然比从数组和切片的索引中直接读取要慢 100 倍；所以如果你很在乎性能的话还是建议用切片来解决问题。
 
+#### map的创建及赋值使用
+
+* 定义：
+    1. 由于map为引用类型，因此使用make进行创建定义：`mapCreated := make(map[string]float32)`
+    2. 使用var定义：`var mapAssigned map[string]int`
+
+* 赋值：
+    1. 使用大括号进行赋值：`mapLit = map[string]int{"one": 1, "two": 2}`
+    2. 直接对map结构同时赋值键与值：`mapCreated["key1"] = 4.5`
+
+#### map的多个返回值
+
+map的返回值中包括当前键是否有对应值的存在，需要该值为True时才能使用map值。
+使用if语句进行判定
+```go
+if _, isPresent  := map1[key1]; ok {
+        // ...
+}
+```
+
+#### 删除map
+使用delete方法删除某键对应的值，如果键不存在，该操作不会产生错误：`delete(map1, key1)`
+
+#### for-range 获取map中键与值
+
+使用for-range结构可以快速去除map中的键与键值
+```go
+for key, value := range map1 {
+        ...
+}
+```
+
  
 
 ### 结构体
->定义格式: 
->type struct_name struct{}
+* 定义格式: `type struct_name struct{}`
 
 
 注意:与函数一样,若结构体或结构体成员需要被外部文件调用,定义时首字母需要大写
