@@ -904,6 +904,15 @@ for key, value := range map1 {
 }
 ```
 
+#### 构建map类型切片
+假设我们想获取一个 map 类型的切片，我们必须使用两次 make() 函数，第一次分配切片，第二次分配 切片中每个 map 元素
+```go
+   invMap := make(map[int]string, len(barVal))
+        for k, v := range barVal {
+                invMap[v] = k
+        }
+```
+
  
 
 ### 结构体
@@ -964,6 +973,9 @@ func struct_init() {
 
 }
 ```
+
+
+
 
 ## 面向对象编程
 
