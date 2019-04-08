@@ -252,7 +252,7 @@ a7 := [4][2]int{1: {10, 11}}                              //第一行赋值
  2. 中括号内无需加任何东西
  3. 可用make创建`(最常用)`
 
-```
+```go
 a2 := []int{111, 222}
 a3 := []int{111, 222, 333}      
 a4 := []int{111, 222, 333, 444} 
@@ -920,7 +920,7 @@ for key, value := range map1 {
 
 
 注意:与函数一样,若结构体或结构体成员需要被外部文件调用,定义时首字母需要大写
-```
+```go
 type sample_struct struct {         //定义为Sample_struct则可被外部调用
 	id   int                        //定义为Id则可被外部调用
 	name string
@@ -973,7 +973,25 @@ func struct_init() {
 
 }
 ```
+#### 使用工厂方法创建结构体实例
 
+工厂的名字以 new 或 New 开头。假设定义了如下的 File 结构体类型：
+```go
+type File struct {
+    fd      int     // 文件描述符
+    name    string  // 文件名
+}
+```
+
+下面是这个结构体类型对应的工厂方法，它返回一个指向结构体实例的指针：
+
+func NewFile(fd int, name string) *File {
+    if fd < 0 {
+        return nil
+    }
+
+    return &File{fd, name}
+}
 
 
 
