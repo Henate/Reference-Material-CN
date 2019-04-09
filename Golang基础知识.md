@@ -916,6 +916,8 @@ for key, value := range map1 {
  
 
 ### 结构体
+
+#### 结构体的一般定义方法
 * 定义格式: `type struct_name struct{}`
 
 
@@ -975,6 +977,7 @@ func struct_init() {
 ```
 #### 使用工厂方法创建结构体实例
 
+1. 定义工厂结构体
 工厂的名字以 new 或 New 开头。假设定义了如下的 File 结构体类型：
 ```go
 type File struct {
@@ -983,8 +986,10 @@ type File struct {
 }
 ```
 
-下面是这个结构体类型对应的工厂方法，它返回一个指向结构体实例的指针：
+2. 实例化工厂方法
+定义工厂结构体类型对应的工厂方法，它返回一个指向结构体实例的**指针**：
 
+```go
 func NewFile(fd int, name string) *File {
     if fd < 0 {
         return nil
@@ -992,14 +997,62 @@ func NewFile(fd int, name string) *File {
 
     return &File{fd, name}
 }
+```
+
+3. 调用工厂方法
+直接往工厂方法传参，参数会初始化相对用的工厂结构体
+```go
+f := NewFile(10, "./test.txt")
+```
+
+#### 匿名字段
+
+* 在一个结构体中对于每一种数据类型只能有一个匿名字段。
+
+* 匿名字段中的成员可以被外部直接使用，因为匿名字段只有类型名无字段名。
+
+```go
+
+type innerS struct {
+        in1 int
+        in2 int
+}
+
+type outerS struct {
+        b    int
+        c    float32
+        int  // anonymous field
+        innerS //anonymous field
+}
+
+func main() {
+        outer := new(outerS)
+        outer.b = 6
+        outer.c = 7.5
+        outer.int = 60
+        outer.in1 = 5           //直接使用匿名字段中的成员
+        outer.in2 = 10
+
+        fmt.Printf("outer.b is: %d\n", outer.b)
+        fmt.Printf("outer.c is: %f\n", outer.c)
+        fmt.Printf("outer.int is: %d\n", outer.int)
+        fmt.Printf("outer.in1 is: %d\n", outer.in1)
+        fmt.Printf("outer.in2 is: %d\n", outer.in2)
+
+        // 使用结构体字面量
+        outer2 := outerS{6, 7.5, 60, innerS{5, 10}}
+        fmt.Println("outer2 is:", outer2)
+}
+```
+
 
 
 
 ## 面向对象编程
 
->  1. 封装：通过方法实现 
->  2. 继承：通过匿名字段实现 
->  3. 多态：通过接口实现
+1. 封装：通过方法实现 
+2. 继承：通过匿名字段实现 
+3. 多态：通过接口实现
 
 ### 一、继承
 
