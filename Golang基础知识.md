@@ -1009,10 +1009,11 @@ f := NewFile(10, "./test.txt")
 
 * 在一个结构体中对于每一种数据类型只能有一个匿名字段。
 
-* 匿名字段中的成员可以被外部直接使用，因为匿名字段只有类型名无字段名。
+* 匿名字段中的结构体成员可以被外部直接使用，因为匿名字段只有类型名无字段名。
 
 ```go
 
+//匿名字段的结构体定义
 type innerS struct {
         in1 int
         in2 int
@@ -1021,15 +1022,15 @@ type innerS struct {
 type outerS struct {
         b    int
         c    float32
-        int  // anonymous field
-        innerS //anonymous field
+        int  // anonymous field 匿名字段
+        innerS //anonymous field 匿名字段
 }
 
 func main() {
         outer := new(outerS)
         outer.b = 6
         outer.c = 7.5
-        outer.int = 60
+        outer.int = 60          //直接对匿名字段类型赋值
         outer.in1 = 5           //直接使用匿名字段中的成员
         outer.in2 = 10
 
@@ -1044,6 +1045,53 @@ func main() {
         fmt.Println("outer2 is:", outer2)
 }
 ```
+
+### 方法
+
+#### 特征
+
+Go 方法是作用在接收者（receiver）上的一个函数，接收者是某种类型的变量。因此方法是一种特殊类型的**函数**。
+
+关于重载：
+* 同一个接收者，方法不允许重载：因为方法是函数，所以同样的，不允许方法重载，即对于一个类型只能有一个给定名称的方法。
+* 接收者不同，方法可以对接收者重载：但是如果基于接收者类型，是有重载的：具有同样名字的方法可以在 2 个或多个不同的接收者类型上存在，比如在同一个包里这么做是允许的
+
+
+#### 定义
+定义方法的一般格式如下：
+```go
+func (recv receiver_type) methodName(parameter_list) (return_value_list) { ... }
+```
+
+在方法名之前，`func` 关键字之后的括号中指定 receiver。
+如果 `recv `是 receiver 的实例，Method1 是它的方法名，那么方法调用遵循传统的` object.name` 选择器符号：recv.Method1()。
+如果`recv `是一个指针，Go 会自动解引用。如果方法不需要使用 recv 的值，可以用`  _` 替换它，比如：
+```go
+func ( _ receiver_type) methodName(parameter_list) (return_value_list) { ... }
+```
+
+#### 接收者类型与方法
+
+接收者类型和作用在它上面定义的方法**必须在同一个包里定义**，这就是为什么不能在 int、float 或类似这些的类型上定义方法。试图在 int 类型上定义方法会得到一个编译错误。
+
+解决：
+1. 先定义该类型（比如：int 或 float）的别名类型，然后再为别名类型定义方法
+```go
+type intForinterface int
+```
+2. 将接收者作为匿名类型嵌入在一个新的结构体中。
+```go
+//嵌入结构体中
+type myTime struct {
+        time.Time   //匿名变量方式（使用时绕过time，直接调用Time）
+}
+
+func (t myTime) first3Chars() string {
+        //直接调用匿名字段中的成员
+        return t.Time.String()[0:3]
+}
+```
+
 
 
 
