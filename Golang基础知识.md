@@ -1335,6 +1335,30 @@ pfunc(s1)
 s1.PrintStructInfo()
 ```
 
+#### 7.接口嵌套接口
+
+* 把多个接口以匿名字段形式嵌套在一个接口中，可以看作使用一个接口作同一个大类的接口的集合
+
+```go
+
+type Lei int
+type Inter_1 interface { 
+    sayHi()
+}
+func (this *Lei) sayHi() { 
+    fmt.Println("hi")
+}
+type Inter_2 interface { 
+    Inter_1                 //接口嵌套接口
+}
+func main() { 
+    var a Lei 
+    var Caller Inter_2  //使用嵌套接口调用匿名接口中的方法
+    Caller = &a 
+    Caller.sayHi()
+}
+```
+
 
 ### 三、接口 interface
 > 格式: type inter interface {methos()}
@@ -1345,7 +1369,7 @@ s1.PrintStructInfo()
 
 
 #### 1.创建接口
-```
+```go
 type sample_struct_1 struct {
 	name string
 	id   int
@@ -1374,14 +1398,16 @@ func call_func() {
 
 > - 多态：调用同一个函数,表现出不同的功能,即多种形态。
 
-#### 2.切片多态
+#### 2.切片多态管理方法
 使用切片有效管理方法
-```
+```go
 //创建切片指向结构体以使用方法
 slic := make([]sampler, 3, 3)
-slic[0] = s1
-slic[1] = s2
-slic[2] = v1
+slic[0] = func1
+slic[1] = func2
+slic[2] = func3
+
+SliceMeth := []Sampler{FuncA, FuncB}
 
 //顺序调用方法
 //第一个值:下标(丢弃), 第二个值:内容(调用方法)
