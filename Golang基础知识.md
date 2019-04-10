@@ -1152,7 +1152,6 @@ func main() {
 
 
 
-
 ## 面向对象编程
 
 1. 封装：通过方法实现 
@@ -1215,7 +1214,7 @@ func struct_init() {
 
 
 #### 1.为类型添加方法
-```
+```go
 //自定义类型UINT_8作为ReceiverType
 type UINT_8 int
 
@@ -1234,7 +1233,7 @@ func call_Add_sum() {
 
 #### 2.为结构体添加方法
 结构体通常会使用type重定义结构体名字，可使用作ReceiverType
-```
+```go
 type sample_struct struct {
 	id   int
 	name string
@@ -1253,7 +1252,7 @@ func call_Modify_struct() {
 
 #### 3.值语义:值作receiver / 引用语义:指针作receiver
 值语义即传参为值,不会修改参数的内容,而使用引用语义并修改后,参数的内容会一并更改
-```
+```go
 //ReceiverType为值类型
 func (obj_struct sample_struct) PrintStructInfo() {
 	fmt.Println("Struct info:", obj_struct)
@@ -1269,7 +1268,7 @@ func (obj_struct *sample_struct) ModifyStructInfo(id int, name string, sex byte)
 
 #### 4.继承来自匿名字段的方法
 如果匿名字段实现了一个方法，那么包含这个匿名字段的struct也能调用该方法。
-```
+```go
 type sample_struct struct {
 	id   int
 	name string
@@ -1295,7 +1294,7 @@ func student_init() {
 #### 5.方法的重写
 
 当ReceiverType使用同名方法,会调用重写后的方法。而通过显式调用则可调用重写前的方法
-```
+```go
 type sample_struct struct {
 	id   int
 	name string
@@ -1327,13 +1326,13 @@ func student_init() {
 方法值:隐式传参
 方法表达式:显式传参
 
-```
-	vfunc := s1.PrintStructInfo
-	vfunc() //不传receiver,调用方法值
+```go
+vfunc := s1.PrintStructInfo
+vfunc() //不传receiver,调用方法值
 
-	pfunc := s1.pModifyStructInfo
-	pfunc(s1)
-	s1.PrintStructInfo()
+pfunc := s1.pModifyStructInfo
+pfunc(s1)
+s1.PrintStructInfo()
 ```
 
 
