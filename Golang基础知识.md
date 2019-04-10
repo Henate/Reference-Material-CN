@@ -1070,7 +1070,7 @@ func (recv receiver_type) methodName(parameter_list) (return_value_list) { ... }
 func ( _ receiver_type) methodName(parameter_list) (return_value_list) { ... }
 ```
 
-#### 接收者类型与方法
+#### 接收者类型与该类型方法
 
 接收者类型和作用在它上面定义的方法**必须在同一个包里定义**，这就是为什么不能在 int、float 或类似这些的类型上定义方法。试图在 int 类型上定义方法会得到一个编译错误。
 
@@ -1091,7 +1091,64 @@ func (t myTime) first3Chars() string {
         return t.Time.String()[0:3]
 }
 ```
+#### 指针类型接收者
 
+对于类型 T，如果在 *T 上存在方法 Meth()，并且 t 是这个类型的变量，那么 t.Meth() 会被自动转换为 (&t).Meth()。
+```go
+func (a *denseMatrix) Add(b Matrix) Matrix
+func (a *sparseMatrix) Add(b Matrix) Matrix
+```
+
+#### 继承
+
+* 通过匿名字段的特性实现继承：当一个匿名类型被内嵌在结构体中时，匿名类型的可见方法也同样被内嵌。
+
+```go
+
+type Engine interface {
+        Start()     //Engine的方法
+        Stop()     //Engine的方法
+}
+
+type Car struct {
+        Engine      //内嵌匿名类型
+}
+
+func (c *Car) GoToWorkIn() {
+        // get in car
+        c.Start()   //直接调用匿名类型中的方法
+        // drive to work
+        c.Stop()
+        // get out of car
+}
+```
+多重继承
+```go
+
+type Camera struct{}
+
+func (c *Camera) TakeAPicture() string {
+        return "Click"
+}
+
+type Phone struct{}
+
+func (p *Phone) Call() string {
+        return "Ring Ring"
+}
+
+type CameraPhone struct {
+        Camera
+        Phone
+}
+
+func main() {
+        cp := new(CameraPhone)
+        fmt.Println("Our new CameraPhone exhibits multiple behaviors...")
+        fmt.Println("It exhibits behavior of a Camera: ", cp.TakeAPicture())
+        fmt.Println("It works like a Phone too: ", cp.Call())
+}
+```
 
 
 
