@@ -1337,6 +1337,8 @@ s1.PrintStructInfo()
 
 #### 7.接口嵌套接口
 
+* 一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中一样。
+
 * 把多个接口以匿名字段形式嵌套在一个接口中，可以看作使用一个接口作同一个大类的接口的集合
 
 ```go
@@ -1356,6 +1358,60 @@ func main() {
     var Caller Inter_2  //使用嵌套接口调用匿名接口中的方法
     Caller = &a 
     Caller.sayHi()
+}
+```
+
+#### 8.类型断言
+
+在运行时若要判断接口的类型，需要用到类型断言：`v := InterfaceVar.(JudgeType)`若返回ok则证明存在此类型的接口变量
+
+
+
+程序中定义了一个新类型 `Circle`，它也实现了 `Shaper` 接口。` if t, ok := areaIntf.(*Square); ok `测试 `areaIntf `里是否有一个包含 `*Square` 类型的变量，结果是确定的；然后我们测试它是否包含一个 `*Circle` 类型的变量，结果是否定的。
+```go
+
+package main
+
+import (
+        "fmt"
+        "math"
+)
+
+type Square struct {
+        side float32
+}
+
+type Circle struct {
+        radius float32
+}
+
+type Shaper interface {
+        Area() float32
+}
+
+func main() {
+        var areaIntf Shaper
+        sq1 := new(Square)
+        sq1.side = 5
+
+        areaIntf = sq1
+        // Is Square the type of areaIntf?
+        if t, ok := areaIntf.(*Square); ok {
+                fmt.Printf("The type of areaIntf is: %T\n", t)
+        }
+        if u, ok := areaIntf.(*Circle); ok {
+                fmt.Printf("The type of areaIntf is: %T\n", u)
+        } else {
+                fmt.Println("areaIntf does not contain a variable of type Circle")
+        }
+}
+
+func (sq *Square) Area() float32 {
+        return sq.side * sq.side
+}
+
+func (ci *Circle) Area() float32 {
+        return ci.radius * ci.radius * math.Pi
 }
 ```
 
