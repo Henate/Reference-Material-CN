@@ -1160,7 +1160,7 @@ func main() {
 
 ### 一、继承
 
-> Golang使用匿名字段实现继承
+Golang使用**匿名字段**实现继承
 匿名字段可有:结构体,方法等
 
 ```go
@@ -1194,19 +1194,18 @@ func struct_init() {
 }
 ```
 
-### 二、封装(方法)
+### 二、接口 interface / 方法
 
 > Golang使用函数(方法)实现封装
 
 格式:
 一般函数: func XXX{}
 匿名函数: func {}
-方法:     func (XXX type)XXX{}
+方法:     func (XXX ReceiverType)XXX{}
 
 
 实现方法:
->   格式：func (receiver ReceiverType) funcName(parameters) (results){}
-
+>   格式：`func (receiver ReceiverType) funcName(parameters) (results){}`
 - 可以给任意自定义类型（包括内置类型，但不包括指针类型）添加相应的方法。
 - 参数 receiver 可任意命名。如⽅法中未曾使⽤，可省略参数名。
 - 参数 receiver 类型可以是 T 或 *T。基类型 T 不能是接⼝或指针。
@@ -1365,8 +1364,6 @@ func main() {
 
 在运行时若要判断接口的类型，需要用到类型断言：`v := InterfaceVar.(JudgeType)`若返回ok则证明存在此类型的接口变量
 
-
-
 程序中定义了一个新类型 `Circle`，它也实现了 `Shaper` 接口。` if t, ok := areaIntf.(*Square); ok `测试 `areaIntf `里是否有一个包含 `*Square` 类型的变量，结果是确定的；然后我们测试它是否包含一个 `*Circle` 类型的变量，结果是否定的。
 ```go
 
@@ -1415,16 +1412,22 @@ func (ci *Circle) Area() float32 {
 }
 ```
 
+#### 9.接口方法集的调用规则
 
-### 三、接口 interface
+当有类型T**实现**了接收者是值的方法T与实现了接收者是指针的方法*T：
+
+1. 类型 *T 的类型可调用方法集包含接受者为 *T 或 T 的所有方法集
+2. 类型 T 的类型可调用方法集包含接受者为 T 的所有方法
+3. 类型 T 的类型不能调用方法集接受者为 *T 的方法
+
+
+#### 10.创建接口
 > 格式: type inter interface {methos()}
 
->- 接⼝命名习惯以 er 结尾
->- 接口只有方法声明，没有实现，没有数据字段
->- 接口可以匿名嵌入其它接口，或嵌入到结构中
+- 接⼝命名习惯以 er 结尾
+- 接口只有方法声明，没有实现，没有数据字段
+- 接口可以匿名嵌入其它接口，或嵌入到结构中
 
-
-#### 1.创建接口
 ```go
 type sample_struct_1 struct {
 	name string
@@ -1454,7 +1457,7 @@ func call_func() {
 
 > - 多态：调用同一个函数,表现出不同的功能,即多种形态。
 
-#### 2.切片多态管理方法
+#### 11.切片多态管理方法
 使用切片有效管理方法
 ```go
 //创建切片指向结构体以使用方法
@@ -1472,7 +1475,7 @@ for _, i := range slic {
 }
 ```
 
-#### 3.函数多态
+#### 12.函数多态
 使用函数的方法灵活调用方法
 ```
 func call_interface(obj sampler) {
@@ -1489,7 +1492,7 @@ func call_func() {
 }
 ```
 
-#### 空接口
+#### 13.空接口
 > 格式: type inter interface {} (大括号内不加方法)
 
  > - 空接口可指向任何类型变量
