@@ -1336,27 +1336,76 @@ s1.PrintStructInfo()
 
 #### 7.接口嵌套接口
 
-* 一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中一样。
+* 内部接口暴露：
+    *  一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中。
 
-* 把多个接口以匿名字段形式嵌套在一个接口中，可以看作使用一个接口作同一个大类的接口的集合
+* 参数类型兼容：
+    * 只要内部接口被实现，以该外部接口类型作为参数的函数，可以接收任何实现了方法的类型变量作为函数的参数。
+
+```go
+type Sorter interface {
+        Len() int
+        Less(i, j int) bool
+        Swap(i, j int)
+}
+
+//内部接口实例化为 IntArray
+type IntArray []int
+
+func (p IntArray) Len() int           { return len(p) }
+func (p IntArray) Less(i, j int) bool { return p[i] < p[j] }
+func (p IntArray) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+
+type StringArray []string
+
+func (p StringArray) Len() int           { return len(p) }
+func (p StringArray) Less(i, j int) bool { return p[i] < p[j] }
+func (p StringArray) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+
+//此处只需要定义类型为Sorter，无论方法Len()/Less()/Swap()的接收者类型是何种类型，都可以使用该函数。
+
+//在此例中，无论是IntArray类型还是StringArray都实现了Len()/Less()/Swap()三种方法，所以可以直接使用该函数。
+func Sort(data Sorter) {
+        for pass := 1; pass < data.Len(); pass++ {
+                for i := 0; i < data.Len()-pass; i++ {
+                        if data.Less(i+1, i) {
+                                data.Swap(i, i+1)
+                        }
+                }
+        }
+}
+```
 
 ```go
 
-type Lei int
-type Inter_1 interface { 
-    sayHi()
+func ints() {
+        data := []int{74, 59, 238, -784, 9845, 959, 905, 0, 0, 42, 7586, -5467984, 7586}
+        
+        //定义一个在sort包中的IntArray类型变量
+        a := sort.IntArray(data) 
+        
+        //直接使用IntArray类型的变量a传参
+        sort.Sort(a)
+        if !sort.IsSorted(a) {
+                panic("fails")
+        }
+        fmt.Printf("The sorted array is: %v\n", a)
 }
-func (this *Lei) sayHi() { 
-    fmt.Println("hi")
-}
-type Inter_2 interface { 
-    Inter_1                 //接口嵌套接口
-}
-func main() { 
-    var a Lei 
-    var Caller Inter_2  //使用嵌套接口调用匿名接口中的方法
-    Caller = &a 
-    Caller.sayHi()
+
+func strings() {
+        data := []string{"monday", "friday", "tuesday", "wednesday", "sunday", "thursday", "", "saturday"}
+        
+        //定义一个在sort包中的StringArray类型变量
+        a := sort.StringArray(data)
+        
+        //直接使用StringArray类型的变量a传参
+        sort.Sort(a)
+        if !sort.IsSorted(a) {
+                panic("fail")
+        }
+        fmt.Printf("The sorted array is: %v\n", a)
 }
 ```
 
