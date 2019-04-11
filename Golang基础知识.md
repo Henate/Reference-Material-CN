@@ -975,7 +975,7 @@ func struct_init() {
 
 }
 ```
-#### 使用工厂方法创建结构体实例
+#### 使用工厂方法创建结构体实例(NewFactor)
 
 1. 定义工厂结构体
 工厂的名字以 new 或 New 开头。假设定义了如下的 File 结构体类型：
@@ -1340,7 +1340,7 @@ s1.PrintStructInfo()
     *  一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中。
 
 * 参数类型兼容：
-    * 只要内部接口被实现，以该外部接口类型作为参数的函数，可以接收任何实现了方法的类型变量作为函数的参数。
+    *  接收一个（或多个）接口类型作为参数的函数，其实参可以是任何实现了该接口的类型的变量。
 
 ```go
 type Sorter interface {
@@ -1364,9 +1364,9 @@ func (p StringArray) Less(i, j int) bool { return p[i] < p[j] }
 func (p StringArray) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 
-//此处只需要定义类型为Sorter，无论方法Len()/Less()/Swap()的接收者类型是何种类型，都可以使用该函数。
+//此处只需要定义类型为Sorter，无论已实现方法Len()/Less()/Swap()的接收者类型是何种类型，都可以使用该函数。
 
-//在此例中，无论是IntArray类型还是StringArray都实现了Len()/Less()/Swap()三种方法，所以可以直接使用该函数。
+//在此例中，无论是IntArray类型还是StringArray都实现了Len()/Less()/Swap()三种方法，所以可以直接作该函数的参数。
 func Sort(data Sorter) {
         for pass := 1; pass < data.Len(); pass++ {
                 for i := 0; i < data.Len()-pass; i++ {
@@ -1542,19 +1542,60 @@ func call_func() {
 ```
 
 #### 13.空接口
-> 格式: type inter interface {} (大括号内不加方法)
+* 格式: type inter interface {} (大括号内不加方法)
 
- > - 空接口可指向任何类型变量
+
+#####  空接口可指向任何类型变量
 空接口(interface{})不包含任何的方法，正因为如此，所有的类型都实现了空接口，因此空接口可以存储任意类型的数值。它有点类似于C语言的void *类型。
 
-```
+```go
 var v1 interface{} = 1     // 将int类型赋值给interface{}
 var v2 interface{} = "abc" // 将string类型赋值给interface{}
 var v3 interface{} = &v2   // 将*interface{}类型赋值给interface{}
 var v4 interface{} = struct{ X int }{1}
 var v5 interface{} = &struct{ X int }{1}
-
 ```
+
+##### 判断变量类型作后续处理
+
+```go
+func TypeSwitch() {
+        //testFunc可接收任意的类型作参数
+        testFunc := func(any interface{}) {
+                switch v := any.(type) {
+                case bool:
+                        fmt.Printf("any %v is a bool type", v)
+                case int:
+                        fmt.Printf("any %v is an int type", v)
+                case float32:
+                        fmt.Printf("any %v is a float32 type", v)
+                case string:
+                        fmt.Printf("any %v is a string type", v)
+                case specialString:
+                        fmt.Printf("any %v is a special String!", v)
+                default:
+                        fmt.Println("unknown type!")
+                }
+        }
+        testFunc(whatIsThis)
+}
+```
+
+#####  复制数据切片至空接口切片
+
+想将切片中的数据复制到一个空接口切片中, 必须使用 for-range 语句来一个一个显式地复制：
+```go
+var dataSlice []myType = FuncReturnSlice()
+var interfaceSlice []interface{} = make([]interface{}, len(dataSlice))
+for i, d := range dataSlice {
+    interfaceSlice[i] = d
+}
+```
+##### 空接口用于函数重载
+
+在 Go 语言中函数重载可以用可变参数 ...T 作为函数最后一个参数来实现（参见 6.3 节）。如果我们把 T 换为空接口，那么可以知道任何类型的变量都是满足 T (空接口）类型的，这样就允许我们传递任何数量任何类型的参数给函数，即重载的实际含义。
+
+`fmt.Printf(format string, a ...interface{}) (n int, errno error)`
 
 
 ## 异常处理 
