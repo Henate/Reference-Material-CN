@@ -1092,57 +1092,6 @@ func (a *denseMatrix) Add(b Matrix) Matrix
 func (a *sparseMatrix) Add(b Matrix) Matrix
 ```
 
-#### 继承
-
-* 通过匿名字段的特性实现继承：当一个匿名类型被内嵌在结构体中时，匿名类型的可见方法也同样被内嵌。
-
-```go
-
-type Engine interface {
-        Start()     //Engine的方法
-        Stop()     //Engine的方法
-}
-
-type Car struct {
-        Engine      //内嵌匿名类型
-}
-
-func (c *Car) GoToWorkIn() {
-        // get in car
-        c.Start()   //直接调用匿名类型中的方法
-        // drive to work
-        c.Stop()
-        // get out of car
-}
-```
-多重继承
-```go
-
-type Camera struct{}
-
-func (c *Camera) TakeAPicture() string {
-        return "Click"
-}
-
-type Phone struct{}
-
-func (p *Phone) Call() string {
-        return "Ring Ring"
-}
-
-type CameraPhone struct {
-        Camera
-        Phone
-}
-
-func main() {
-        cp := new(CameraPhone)
-        fmt.Println("Our new CameraPhone exhibits multiple behaviors...")
-        fmt.Println("It exhibits behavior of a Camera: ", cp.TakeAPicture())
-        fmt.Println("It works like a Phone too: ", cp.Call())
-}
-```
-
 
 
 ## 面向对象编程
@@ -1156,6 +1105,7 @@ func main() {
 Golang使用**匿名字段**实现继承
 匿名字段可有:结构体,方法等
 
+#### 匿名字段的赋值
 ```go
 //匿名字段为结构体:
 type part_struct struct {           //匿名字段
@@ -1187,9 +1137,64 @@ func struct_init() {
 }
 ```
 
+#### 方法中的继承
+特征：
+* 结构体内部的匿名字段所实现的方法，可被该结构体变量直接调用。
+
+
+1. 在结构体实现方法时可以使用继承
+```go
+
+type Engine interface {
+        Start()     //Engine的方法
+        Stop()     //Engine的方法
+}
+
+type Car struct {
+        Engine      //内嵌匿名类型
+}
+
+func (c *Car) GoToWorkIn() {
+        // get in car
+        c.Start()   //直接调用匿名类型中的方法
+        // drive to work
+        c.Stop()
+        // get out of car
+}
+```
+
+2. 在结构体被调用时可以使用继承
+
+```go
+
+type Camera struct{}
+
+func (c *Camera) TakeAPicture() string {
+        return "Click"
+}
+
+type Phone struct{}
+
+func (p *Phone) Call() string {
+        return "Ring Ring"
+}
+
+type CameraPhone struct {
+        Camera
+        Phone
+}
+
+func main() {
+        cp := new(CameraPhone)
+        fmt.Println("Our new CameraPhone exhibits multiple behaviors...")
+        fmt.Println("It exhibits behavior of a Camera: ", cp.TakeAPicture())    //直接调用方法
+        fmt.Println("It works like a Phone too: ", cp.Call())                               //直接调用方法
+}
+```
+
 ### 二、接口 interface / 方法
 
-> Golang使用函数(方法)实现封装
+ Golang使用函数(方法)实现封装
 
 格式:
 一般函数: func XXX{}
@@ -1198,10 +1203,10 @@ func struct_init() {
 
 
 实现方法:
->   格式：`func (receiver ReceiverType) funcName(parameters) (results){}`
+ 格式：`func (receiver ReceiverType) funcName(parameters) (results){}`
 - 可以给任意自定义类型（包括内置类型，但不包括指针类型）添加相应的方法。
 - 参数 receiver 可任意命名。如⽅法中未曾使⽤，可省略参数名。
-- 参数 receiver 类型可以是 T 或 *T。基类型 T 不能是接⼝或指针。
+- 参数 receiver 类型可以是 T 或 `*T`。基类型 T 不能是接⼝或指针。
 - 不支持重载方法，也就是说，不能定义名字相同但是不同参数的方法。
 
 
@@ -1327,13 +1332,13 @@ pfunc(s1)
 s1.PrintStructInfo()
 ```
 
-#### 7.接口嵌套接口
+#### 7.函数通过接口忽略参数类型
 
 * 内部接口暴露：
     *  一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中。
 
 * 参数类型兼容：
-    *  接收一个（或多个）接口类型作为参数的函数，其实参可以是任何实现了该接口的类型的变量。
+    *  接收一个（或多个）接口类型作为参数的函数，他的实参可以是任何实现了该接口的类型的变量。
 
 ```go
 type Sorter interface {
@@ -1359,7 +1364,7 @@ func (p StringArray) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 //此处只需要定义类型为Sorter，无论已实现方法Len()/Less()/Swap()的接收者类型是何种类型，都可以使用该函数。
 
-//在此例中，无论是IntArray类型还是StringArray都实现了Len()/Less()/Swap()三种方法，所以可以直接作该函数的参数。
+//在此例中，无论是IntArray类型还是StringArray都实现了Len()/Less()/Swap()三种方法，所以可以直接作为该函数的参数输入到函数中。
 func Sort(data Sorter) {
         for pass := 1; pass < data.Len(); pass++ {
                 for i := 0; i < data.Len()-pass; i++ {
@@ -1519,7 +1524,7 @@ for _, i := range slic {
 
 #### 12.函数多态
 使用函数的方法灵活调用方法
-```
+```go
 func call_interface(obj sampler) {
 	obj.sayhi()
 }
@@ -1599,7 +1604,7 @@ for i, d := range dataSlice {
 
 函数的异常返回值
 函数中定义一个返回值为异常返回,可根据异常返回是否nil决定后续动作。
-```
+```go
 package main
 
 import (
@@ -1639,7 +1644,7 @@ func main() {
 
 不是所有的panic异常都来自运行时，直接调用内置的panic函数也会引发panic异常；panic函数接受任何值作为参数。
 
-```
+```go
 //自定方法中用panic防止发生错误
 func panic_example(){
     ret, error := rungo()
@@ -1654,7 +1659,7 @@ func panic_example(){
 > - recover使当前的程序从运行时panic的状态中恢复并重新获得流程控制权。
 
 
-```
+```go
 //该代码片段放在可能出现panic的func内,可拦截panic,让程序继续往下走
 defer func() {
 	if err := recover(); err != nil {
@@ -1675,7 +1680,7 @@ defer func() {
 func Contains(s, substr string) bool
 功能：字符串s中是否包含substr，返回bool值
 
-```
+```go
 fmt.Println(strings.Contains("seafood", "foo"))
 ```
 
@@ -1684,7 +1689,7 @@ fmt.Println(strings.Contains("seafood", "foo"))
 func Join(a []string, sep string) string
 功能：字符串链接，把slice a通过sep链接起来
 
-```
+```go
 s := []string{"foo", "bar", "baz"}
 fmt.Println(strings.Join(s, ", "))
 //运行结果:foo, bar, baz
@@ -1694,7 +1699,7 @@ fmt.Println(strings.Join(s, ", "))
 func Index(s, sep string) int
 功能：在字符串s中查找sep所在的位置，返回位置值，找不到返回-1
 
-```
+```go
 fmt.Println(strings.Index("chicken", "ken"))
 ```
 
@@ -1702,7 +1707,7 @@ fmt.Println(strings.Index("chicken", "ken"))
 func Repeat(s string, count int) string
 功能：重复s字符串count次，最后返回重复的字符串
 
-```
+```go
 fmt.Println("ba" + strings.Repeat("na", 2))
 //运行结果:banana
 ```
@@ -1711,7 +1716,7 @@ fmt.Println("ba" + strings.Repeat("na", 2))
 func Replace(s, old, new string, n int) string
 功能：在s字符串中，把old字符串替换为new字符串，n表示替换的次数，小于0表示全部替换
 
-```
+```go
 fmt.Println(strings.Replace("oink oink oink", "k", "ky", 2))
 fmt.Println(strings.Replace("oink oink oink", "oink", "moo", -1))
 //运行结果:
@@ -1723,7 +1728,7 @@ fmt.Println(strings.Replace("oink oink oink", "oink", "moo", -1))
 func Fields(s string) []string
 功能：去除s字符串的空格符，并且按照空格分割返回slice
 
-```
+```go
 fmt.Printf("Fields are: %q", strings.Fields("  foo bar  baz   "))
 //运行结果:Fields are: ["foo" "bar" "baz"]
 ```
@@ -1740,7 +1745,7 @@ func Split(s, sep string) []string
 func Trim(s string, cutset string) string
 功能：在s字符串的头部和尾部去除cutset指定的字符串
 
-```
+```go
     fmt.Printf("[%q]", strings.Trim(" !!! Achtung !!! ", "! "))
     //运行结果:["Achtung"]
 ```
@@ -1752,7 +1757,7 @@ func Trim(s string, cutset string) string
 #### 1.Append - 向数组追加各种类型变量
 Append 系列函数将整数等转换为字符串后，添加到现有的字节数组中。
 
-```
+```go
 str := make([]byte, 0, 100)                 //make切片
 str = strconv.AppendInt(str, 4567, 10)      //以10进制方式追加
 str = strconv.AppendBool(str, false)        //以布尔类型方式追加
@@ -1764,7 +1769,7 @@ fmt.Println(string(str))                    //4567false"abcdefg"'单'
 #### 2. Format
 Format 系列函数把其他类型的转换为字符串。
 
-```
+```go
 a := strconv.FormatBool(false)          //布尔类型转字符串
 b := strconv.FormatInt(1234, 10)        //把有符号整形转为字符串
 c := strconv.FormatUint(12345, 10)      //把无符号整形转为字符串
@@ -1775,7 +1780,7 @@ fmt.Println(a, b, c, d)                 //false 1234 12345 1023
 #### 3.Parse 
 Parse 系列函数把字符串转换为其他类型。
 
-```
+```go
 func checkError(e error) {
     if e != nil {
         fmt.Println(e)
@@ -1817,18 +1822,18 @@ JSON官方网站：http://www.json.org/
 注:不能用含JSON名字定义.go文件
 
 使用json.Marshal()函数可以对一组数据进行JSON格式的编码。 json.Marshal()函数的声明如下：
-```
+```go
 func Marshal(v interface{}) ([]byte, error)
 ```
 格式化输出：
-```
+```go
 // MarshalIndent 很像 Marshal，只是用缩进对输出进行格式化
 func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error
 ```
 
 ### 一、生成Json
 #### ①结构体生成json
-```
+```go
 //结构体变量首字母必须大写
 type Json_struct struct {
 	Company  string   `json:"company"` //struct tag 改变名字
@@ -1860,7 +1865,7 @@ func main() {
 
 #### ②字典map生成json
 
-```
+```go
 m1 := make(map[string]interface{}, 4)
 
 m1["Company"] = "Itcast"
@@ -1880,14 +1885,14 @@ fmt.Println("json:", string(j_buf))
 使用json.Unmarshal()函数将JSON格式的文本解码为Go里面预期的数据结构。
 
 json.Unmarshal()函数的原型：
-```
+```go
     func Unmarshal(data []byte, v interface{}) error
 ```
 该函数的第一个参数是输入，即JSON格式的文本（比特序列），第二个参数表示目标输出容器，用于存放解码后的值。
 
 #### ①.结构体接收解码
 
-```
+```go
 	decode_json := []byte(`{
     "company": "itcast",
     "subjects": [
@@ -1913,7 +1918,7 @@ json.Unmarshal()函数的原型：
 
 不及结构体输出简单,但解码方便.
 
-```
+```go
 //创建容量为4的[string]interface{}类型
 m := make(map[string]interface{}, 4)        
 
@@ -1948,7 +1953,7 @@ for _, value := range m {
 ### 一、创建文件
 
 #### 新建文件两个方法
-```
+```go
 //根据提供的文件名创建新的文件，返回一个文件对象，默认权限是0666的文件，返回的文件对象是可读写的。
 func Create(name string) (file *File, err Error)
 
@@ -1956,7 +1961,7 @@ func Create(name string) (file *File, err Error)
 func NewFile(fd uintptr, name string) *File
 ```
 #### 打开文件两个方法
-```
+```go
 //该方法打开一个名称为name的文件，但是是只读方式，内部实现其实调用了OpenFile。
 func Open(name string) (file *File, err Error)
 
@@ -1966,7 +1971,7 @@ func OpenFile(name string, flag int, perm uint32) (file *File, err Error)
 
 ### 二、写文件
 
-```
+```go
 //写入byte类型的信息到文件
 func (file *File) Write(b []byte) (n int, err Error)
 
@@ -1979,18 +1984,16 @@ func (file *File) WriteString(s string) (ret int, err Error)
 
 ### 三、读文件
 
-```
+```go
 //读取数据到b中
 func (file *File) Read(b []byte) (n int, err Error)
 
 //从off开始读取数据到b中
 func (file *File) ReadAt(b []byte, off int64) (n int, err Error)
-
-
 ```
 
 ### 四、实例
-```
+```go
 func main() {
     args := os.Args //获取用户输入的所有参数
 
@@ -2060,7 +2063,7 @@ func main() {
 ### 一、goroutine
 包 "runtime"
 一般方式
-```
+```go
 func co_fun() {
 	fmt.Println("biubiu")   //在主协程后执行
 }
@@ -2076,7 +2079,7 @@ func main() {
 #### ①.runtime.Gosched()
 用于让出CPU时间片，让出当前goroutine的执行权限，调度器安排其他等待的任务运行，并在下次某个时候从该位置恢复执行。
 
-```
+```go
 func co_fun() {
 	fmt.Println("biubiu")
 }
@@ -2089,7 +2092,7 @@ func main() {
 ```
 
 #### ②.runtime.Goexit
-```
+```go
 func co_fun() {
 	defer fmt.Println("tyj")
 	runtime.Goexit()            //把defer执行完后,退出协程
@@ -2107,7 +2110,7 @@ func main() {
 #### ③.GOMAXPROCS
  设置并行计算的CPU核数的最大值，并返回之前的值。
 
-```
+```go
 runtime.GOMAXPROCS(4) //设置4核运行
 ```
 
@@ -2117,11 +2120,12 @@ runtime.GOMAXPROCS(4) //设置4核运行
  1. 由make创建
  2. 作参时为引用类型
  3. 零值为nil
+ 4. 通过make关键字定义channel有无缓buffer
 
 #### ①.声明格式
  1. capacity = 0 时 channel 为无缓冲阻塞读写
  2. capacity > 0 时 channel 有缓冲、非阻塞的，直到写满capacity个元素才阻塞写入
-```
+```go
 make(chan Type) //等价于make(chan Type, 0)
 make(chan Type, capacity)
 ```
@@ -2129,10 +2133,12 @@ make(chan Type, capacity)
 #### ②.使用 <- 赋值
 channel通过**操作符<-**来接收和发送数据，发送和接收数据语法：
 
+```go
     channel <- value      //发送value到channel
     <-channel             //接收并将其丢弃
     x := <-channel        //从channel中接收数据，并赋值给x
     x, ok := <-channel    //功能同上，同时检查通道是否已关闭或者是否为空
+```
 
 使用<-发送value到channel后,若value没有被接收,则当前goruntine不能往下执行
 即:**value被接收前阻塞留在当前Goruntine中**
@@ -2140,7 +2146,7 @@ channel通过**操作符<-**来接收和发送数据，发送和接收数据语�
 #### ③.无缓冲channel:
 > - 无缓冲的通道（unbuffered channel）是指在接收前没有能力保存任何值的通道。
 
-```
+```go
 var ch_1 = make(chan string)    //全局变量使用var声明
 
 func cl_printer(str string) {
@@ -2176,7 +2182,7 @@ func main() {
 > - 有缓冲的通道（buffered channel）是一种在被接收前能存储一个或者多个值的通道。
 > - 当channel中有缓冲value时,可一边输入一边输入,保持value持续传递.
 
-```
+```go
 var ch = make(chan int, 3) //有缓存channel
 
 func main() {
@@ -2204,7 +2210,7 @@ func main() {
  3. 关闭channel后，可以继续向channel接收数据； 对于nil channel，无论收发都会被阻塞。
 
 接收缓冲channel方法一:
-```
+```go
 //check到channel关闭后退出接收的for循环
 for {
 	if data, ok := <-ch; ok {
@@ -2215,7 +2221,7 @@ for {
 }
 ```
 接收缓冲channel方法二:
-```
+```go
 //range 遍历接收channel内所有data
 for data := range ch {
 	fmt.Println("ch output: ", data)
@@ -2229,7 +2235,7 @@ for data := range ch {
  2. 可声明单项chanel
 
 单向channel变量的声明:
-```
+```go
 var ch1 chan int       // ch1是一个正常的channel，不是单向的
 var ch2 chan<- float64 // ch2是单向channel，只用于写float64数据
 var ch3 <-chan int     // ch3是单向channel，只用于读取int数据
@@ -2251,7 +2257,7 @@ var ch3 <-chan int     // ch3是单向channel，只用于读取int数据
  4. 定时器重置: timer.Reset()
 
 应用实例:
-```
+```go
 //倒计时2秒
 timer1 := time.NewTimer(time.Second * 1)
 //倒计时结束前阻塞
@@ -2289,7 +2295,7 @@ for {
 
 #### ②.Ticker - 定时触发的计时器
 以一个间隔(interval)往channel发送一个事件(当前时间)，而channel的接收者可以以固定的时间间隔从channel中读取事件。
-```
+```go
 for {
 	//间隔1s
 	timer1 := time.NewTicker(time.Second * 1)
@@ -2305,7 +2311,7 @@ for {
  2. 在一个select中，Go语言会按顺序从头至尾评估每一个发送和接收的语句。
  3. 若其中的任意一语句可以继续执行(即没有被阻塞)，随机挑选执行。
 
-```
+```go
 select {
 case <-chan1:
     // 如果chan1成功读到数据，则进行该case处理语句
