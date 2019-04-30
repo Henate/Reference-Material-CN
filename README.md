@@ -17,3 +17,4 @@
 ### Some Research Notes:
 
 1. [Golang](https://github.com/Henate/Reference-Material-CN/blob/master/Golang%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.md)
+2. [gRPC](https://github.com/Henate/Reference-Material-CN/blob/master/gRPC.md)
