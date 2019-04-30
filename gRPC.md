@@ -1,15 +1,35 @@
 # gRPC笔记
 
 ## 安装依赖
-1. 安装gPRC
+### 安装gPRC
 `go get -u google.golang.org/grpc`
-在gRPC的[github release](https://github.com/protocolbuffers/protobuf/releases)处下载gRPC最新版本。并把$LOCAL\protoc-3.7.1-win64\bin加到环境变量中以使用gPRC
 
-2. 安装Protoc Plugin
-`go get -u github.com/golang/protobuf/{proto,protoc-gen-go}`
+
+### 安装Protoc Plugin
+#### win10环境
+在Protocbuf的[github release](https://github.com/protocolbuffers/protobuf/releases)处下载Protocbuf最新版本。并把$LOCAL\protoc-3.7.1-win64\bin加到环境变量中以使用Protocbuf.
+
 此步成功后将会在$GOPATH/bin目录下出现protoc-gen-go.exe，需要把$GOPATH/bin加入到环境变量才能使用protoc-gen-go对proto文件进行编译。
 
-## IDL
+#### Linux环境
+执行以下命令
+```bash
+wget https://github.com/google/protobuf/releases/download/v3.5.1/protobuf-all-3.5.1.zip
+unzip protobuf-all-3.5.1.zip
+cd protobuf-3.5.1/
+./configure
+make
+make install
+```
+
+
+
+## Protobuf
+
+### Protobuf特点
+
+![3283ef24196a6b27b78a10bc2d78173e.png](en-resource://database/472:0)
+
 
 在 proto 文件夹下的 search.proto 文件中，写入如下内容
 ```go
@@ -29,6 +49,8 @@ message SearchResponse {
     string response = 1;
 }
 ```
+- 其中：service SearchService 为定下的Server&Client的请求回复任务Search。任何需要使用gRPC的方法都要在这里定义相关方法
+   
 - 在当前文件夹处执行：
 `protoc --go_out=plugins=grpc:. *.proto`
 或者
@@ -37,7 +59,10 @@ message SearchResponse {
 - P.S：注意要在全部依赖注入后才生成proto，以保证生成函数的完整性。
 
 
+
 ## 最小程序
+
+![4e69f94b51088937e992c043ed6a88bd.png](en-resource://database/470:0)
 
 ### Server
 
