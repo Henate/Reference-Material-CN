@@ -209,7 +209,7 @@ go run Client.go
 
 ## gRPC Streaming Client and Server
 
-### 为什么用 Streaming RPC
+### 使用 Streaming RPC的优势
 1. 大规模数据包
 2. 实时场景
 
@@ -250,4 +250,139 @@ message StreamRequest {
 message StreamResponse {
   StreamPoint pt = 1;
 }
+```
+
+### 编译.protoc生成函数详解
+
+- ServiceDesc：represents an RPC service's specification.
+```go
+type ServiceDesc struct {        
+    ServiceName string        
+    // The pointer to the service interface. Used to check whether the user       
+    // provided implementation satisfies the interface requirements.        
+    HandlerType interface{}        
+    Methods     []MethodDesc    //初始化非Stream方法        
+    Streams     []StreamDesc      //初始化Stream方法  
+    Metadata    interface{}
+}
+```
+
+- 编译Stream.proto后将根据Strem这个名字生成以Stream开头的变量： `_StreamService_serviceDesc`
+
+```go
+var _StreamService_serviceDesc = grpc.ServiceDesc{        
+    ServiceName: "proto.StreamService",        
+    HandlerType: (*StreamServiceServer)(nil),        
+    Methods:     []grpc.MethodDesc{},       
+    Streams: []grpc.StreamDesc{               
+        {                       
+            StreamName:    "List",                       
+            Handler:       _StreamService_List_Handler,                       
+            ServerStreams: true,              
+        },              
+        {                       
+            StreamName:    "Record",                      
+            Handler:       _StreamService_Record_Handler,                      
+            ClientStreams: true,               
+        },               
+        {                       
+            StreamName:    "Route",                      
+            Handler:       _StreamService_Route_Handler,                       
+            ServerStreams: true,                       
+            ClientStreams: true,               
+        },        
+    },        
+    Metadata: "stream.proto",
+}
+```
+
+- 在Service_serviceDesc中的Handler已自动生成，但其返回函数需要手动编写。如下例中为List
+
+```go
+func _StreamService_List_Handler(srv interface{}, stream grpc.ServerStream) error {        
+    fmt.Println("List_Handler")        
+    m := new(StreamRequest)       
+    if err := stream.RecvMsg(m); err != nil {               
+        return err        
+    }        
+    return srv.(StreamServiceServer).List(m, &streamServiceListServer{stream})
+}
+```
+- 自定义List方法的实现，如下为实现调用stream.Send进行传递一系列信息。
+```go
+func (s *StreamService) List(r *pb.StreamRequest, stream pb.StreamService_ListServer)error{        
+    for n := 0; n <= 6; n++ {               
+        err := stream.Send(&pb.StreamResponse{                       
+            Pt: &pb.StreamPoint{                              
+                Name:  r.Pt.Name,                              
+                Value: r.Pt.Value + int32(n),                      
+            },              
+    })               
+        if err != nil {                       
+            return err              
+        }        
+    }        
+    return nil
+}
+```
+
+
+### Server-side streaming RPC：服务器端流式 RPC
+
+#### 特性
+![f451b9aa7a44bcb9a9f0977f33d0a855.png](en-resource://database/474:1)
+
+服务器端流式 RPC，为单向流，并代指 **Server 为 Stream** 而 **Client 为普通 RPC** 请求
+
+> 客户端发起一次普通的 RPC 请求，**服务端通过流式响应多次发送数据集**，**客户端 Recv 接收数据**集。
+
+在写.proto文件时就需要定义server端的response为stream:
+
+```go
+service StreamService {
+    rpc List(StreamRequest) returns (stream StreamResponse) {};
+    ....
+}
+```
+
+### Server端
+1. 调用grpc包中的NewServer()创建Server对象
+2. 完成SeverHandler函数
+2. 定义一个 Server handler函数，并与第一步中创建的Server对象注册到proto中
+3. 监听tcp&port
+
+
+#### Client端
+
+1. 连接Server监听的port
+2. 使用第一步获得的连接创建Client对象
+3. 发送RPC请求
+```go
+client := pb.NewStreamServiceClient(conn)
+err = printLists(client, &pb.StreamRequest{Pt: &pb.StreamPoint{Name: "gRPC Stream Client: List", Value: 2018}})
+if err != nil {        
+    log.Fatalf("printLists.err: %v", err)
+}
+```
+由于要接收来自Server端的Stream数据，需要在for循环中使用stream.Recv()读取资料，直到收到EOF停止
+```go
+func printLists(client pb.StreamServiceClient, r *pb.StreamRequest) error {       
+    stream, err := client.List(context.Background(), r)        
+    if err != nil {               
+        return err        
+    }        
+    for {               
+            resp, err := stream.Recv()               
+            if err == io.EOF {                      
+                break            
+            }               
+            if err != nil {                       
+                return err               
+            }               
+            log.Printf("resp: pj.name: %s, pt.value: %d", resp.Pt.Name, resp.Pt.Value)        
+    }        
+    return nil
+}
+
+
 ```
