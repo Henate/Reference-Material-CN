@@ -325,7 +325,12 @@ func (s *StreamService) List(r *pb.StreamRequest, stream pb.StreamService_ListSe
     return nil
 }
 ```
+#### 使用Recv读取Stream中gRPC消息体
 
+`RecvMsg`会从流中读取完整的 gRPC 消息体
+（1）RecvMsg 是阻塞等待的
+（2）RecvMsg 当流成功/结束（调用了 Close）时，会返回 io.EOF
+（3）RecvMsg 当流出现任何错误时，流会被中止，错误信息会包含 RPC 错误码。而在 RecvMsg 中可能出现如下错误：io.EOFio.ErrUnexpectedEOFtransport.ConnectionErrorgoogle.golang.org/grpc/codes
 
 ### Server-side streaming RPC：服务器端流式 RPC
 
@@ -364,7 +369,7 @@ if err != nil {        
     log.Fatalf("printLists.err: %v", err)
 }
 ```
-由于要接收来自Server端的Stream数据，需要在for循环中使用stream.Recv()读取资料，直到收到EOF停止
+4. 由于要接收来自Server端的Stream数据，需要在for循环中使用stream.Recv()读取资料，直到收到EOF停止
 ```go
 func printLists(client pb.StreamServiceClient, r *pb.StreamRequest) error {       
     stream, err := client.List(context.Background(), r)        
@@ -383,6 +388,135 @@ func printLists(client pb.StreamServiceClient, r *pb.StreamRequest) error {  �
     }        
     return nil
 }
+```
+
+### Client-side streaming RPC：客户端流式 RPC
+
+#### 特性
+
+![c3b501baa1211aac2602069cc2909b6b.png](en-resource://database/476:0)
 
 
+#### Server端
+
+在接收客户端Stream消息体需要对每一个 Recv 都进行处理。
+当发现 io.EOF (流关闭) 后，通过`stream.SendAndClose`将最终的响应结果发送给客户端，同时关闭客户端正在另外一侧等待的 Recv。
+```go
+func (s *StreamService) Record(stream pb.StreamService_RecordServer) error {
+    for {
+        r, err := stream.Recv()
+        if err == io.EOF {
+            return stream.SendAndClose(&pb.StreamResponse{Pt: &pb.StreamPoint{Name: "gRPC Stream Server: Record", Value: 1}})
+        }
+        if err != nil {
+            return err
+        }
+
+        log.Printf("stream.Recv pt.name: %s, pt.value: %d", r.Pt.Name, r.Pt.Value)
+    }
+
+    return nil
+}
+```
+
+#### Client端
+
+在Server端处调用了`stream.SendAndClose`发送最终响应后，在Client端处调用stream.CloseAndRecv().
+```go
+func printRecord(client pb.StreamServiceClient, r *pb.StreamRequest) error {
+    stream, err := client.Record(context.Background())
+    if err != nil {
+        return err
+    }
+
+    for n := 0; n < 6; n++ {
+        err := stream.Send(r)
+        if err != nil {
+            return err
+        }
+    }
+
+    resp, err := stream.CloseAndRecv()
+    if err != nil {
+        return err
+    }
+
+    log.Printf("resp: pj.name: %s, pt.value: %d", resp.Pt.Name, resp.Pt.Value)
+
+    return nil
+}
+```
+
+### Bidirectional streaming RPC：双向流式 RPC
+
+#### 特征
+
+双向流式 RPC，顾名思义是双向流。由客户端以流式的方式发起请求，服务端同样以流式的方式响应请求首个请求一定是 Client 发起，但具体交互方式（谁先谁后、一次发多少、响应多少、什么时候关闭）根据程序编写的方式来确定（可以结合协程）
+
+![20788db9944768139777032eef4f8fd2.png](en-resource://database/478:0)
+
+
+#### Server端
+
+```go
+
+func (s *StreamService) Route(stream pb.StreamService_RouteServer) error {
+    n := 0
+    for {
+        err := stream.Send(&pb.StreamResponse{
+            Pt: &pb.StreamPoint{
+                Name:  "gPRC Stream Client: Route",
+                Value: int32(n),
+            },
+        })
+        if err != nil {
+            return err
+        }
+
+        r, err := stream.Recv()
+        if err == io.EOF {
+            return nil
+        }
+        if err != nil {
+            return err
+        }
+
+        n++
+
+        log.Printf("stream.Recv pt.name: %s, pt.value: %d", r.Pt.Name, r.Pt.Value)
+    }
+
+    return nil
+}
+```
+#### Client端
+```go
+
+func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
+    stream, err := client.Route(context.Background())
+    if err != nil {
+        return err
+    }
+
+    for n := 0; n <= 6; n++ {
+        err = stream.Send(r)
+        if err != nil {
+            return err
+        }
+
+        resp, err := stream.Recv()
+        if err == io.EOF {
+            break
+        }
+        if err != nil {
+            return err
+        }
+
+        log.Printf("resp: pj.name: %s, pt.value: %d", resp.Pt.Name, resp.Pt.Value)
+    }
+
+    stream.CloseSend()
+
+    return nil
+}
 ```
