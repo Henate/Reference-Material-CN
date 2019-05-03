@@ -394,7 +394,7 @@ func printLists(client pb.StreamServiceClient, r *pb.StreamRequest) error {  �
 
 #### 特性
 
-![c3b501baa1211aac2602069cc2909b6b.png](en-resource://database/476:0)
+![c3b501baa1211aac2602069cc2909b6b.png](en-resource://database/476:1)
 
 
 #### Server端
@@ -453,7 +453,7 @@ func printRecord(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 
 双向流式 RPC，顾名思义是双向流。由客户端以流式的方式发起请求，服务端同样以流式的方式响应请求首个请求一定是 Client 发起，但具体交互方式（谁先谁后、一次发多少、响应多少、什么时候关闭）根据程序编写的方式来确定（可以结合协程）
 
-![20788db9944768139777032eef4f8fd2.png](en-resource://database/478:0)
+![20788db9944768139777032eef4f8fd2.png](en-resource://database/478:1)
 
 
 #### Server端
@@ -518,5 +518,61 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
     stream.CloseSend()
 
     return nil
+}
+```
+
+### TLS for gRPC
+
+#### Server端
+
+通过方法`NewServerTLSFromFile`输入：
+1. 证书文件
+2. 密钥构造 TLS 凭证
+```go
+func main() {
+    c, err := credentials.NewServerTLSFromFile("../../conf/server.pem", "../../conf/server.key")
+    if err != nil {
+        log.Fatalf("credentials.NewServerTLSFromFile err: %v", err)
+    }
+
+    server := grpc.NewServer(grpc.Creds(c))
+    pb.RegisterSearchServiceServer(server, &SearchService{})
+
+    lis, err := net.Listen("tcp", ":"+PORT)
+    if err != nil {
+        log.Fatalf("net.Listen err: %v", err)
+    }
+
+    server.Serve(lis)
+}
+```
+
+#### Client端
+
+通过方法`NewClientTLSFromFile`输入
+1. 证书文件
+
+```go
+func main() {
+    c, err := credentials.NewClientTLSFromFile("../../conf/server.pem", "go-grpc-example")
+    if err != nil {
+        log.Fatalf("credentials.NewClientTLSFromFile err: %v", err)
+    }
+
+    conn, err := grpc.Dial(":"+PORT, grpc.WithTransportCredentials(c))
+    if err != nil {
+        log.Fatalf("grpc.Dial err: %v", err)
+    }
+    defer conn.Close()
+
+    client := pb.NewSearchServiceClient(conn)
+    resp, err := client.Search(context.Background(), &pb.SearchRequest{
+        Request: "gRPC",
+    })
+    if err != nil {
+        log.Fatalf("client.Search err: %v", err)
+    }
+
+    log.Printf("resp: %s", resp.GetResponse())
 }
 ```
