@@ -1,4 +1,4 @@
-# gRPC笔记
+# gRPC 101
 
 ## 安装依赖
 ### 安装gPRC
@@ -523,7 +523,7 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 
 ### TLS for gRPC
 
-#### 生成证书
+#### 生成TLS证书
 私钥：
 `openssl ecparam -genkey -name secp384r1 -out server.key`
 
@@ -583,3 +583,72 @@ func main() {
     log.Printf("resp: %s", resp.GetResponse())
 }
 ```
+
+### CA for gRPC
+
+#### 生成CA证书
+
+- 引入遵守 X.509 标准的 CA 颁发的根证书保证证书的可靠性和有效性。
+
+根证书（root certificate）是属于根证书颁发机构（CA）的公钥证书。我们可以通过验证 CA 的签名从而信任 CA ，任何人都可以得到 CA 的证书（含公钥），用以验证它所签发的证书（客户端、服务端）
+它包含的文件如下：
+1. 公钥
+2. 密钥
+
+##### 生成ca.key
+`openssl genrsa -out ca.key 2048`
+```go
+//Output：
+Generating RSA private key, 2048 bit long modulus
+```
+
+##### 生成证书密钥ca.pem
+`openssl req -new -x509 -days 7200 -key ca.key -out ca.pem`
+```go
+//Output
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:CN
+State or Province Name (full name) [Some-State]:GD
+Locality Name (eg, city) []:GZ
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:PIS
+Organizational Unit Name (eg, section) []:ME
+Common Name (e.g. server FQDN or YOUR name) []:Streaming-gRPC
+Email Address []:Henate@126.com
+PS D:\_Work\_Doing\gRPC-go\src\github.com\Henate\Streaming-gRPC\conf>
+
+```
+
+#### Server证书
+
+##### 生成CSR
+CSR 是 Cerificate Signing Request 的英文缩写，为证书请求文件。主要作用是 CA 会利用 CSR 文件进行签名使得攻击者无法伪装或篡改原有证书
+命令：`openssl req -new -key server.key -out server.csr`
+
+##### 使用CA签名CSR
+命令：`openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in server.csr -outserver.pem`
+
+输出：
+```go
+Signature ok
+subject=C = CN, ST = GD, L = GZ, O = PIS, OU = ME, CN = Streaming-gRPC, emailAddress = Henate@126.com
+Getting CA Private Key
+```
+#### Client证书
+
+##### 生成 Key
+`openssl ecparam -genkey -name secp384r1 -out client.key`
+##### 生成 CSR
+`openssl req -new -key client.key -out client.csr`
+##### 基于 CA 签发
+`openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -outclient.pem`
+
+##### 小结
+1. Client 通过请求得到 Server 端的证书
+2. 使用 CA 认证的根证书对 Server 端的证书进行可靠性、有效性等校验
+3. 校验 ServerName 是否可用、有效
