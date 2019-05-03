@@ -523,6 +523,13 @@ func printRoute(client pb.StreamServiceClient, r *pb.StreamRequest) error {
 
 ### TLS for gRPC
 
+#### 生成证书
+私钥：
+`openssl ecparam -genkey -name secp384r1 -out server.key`
+
+公钥：
+`openssl req -new -x509 -sha256 -key server.key -out server.pem -days 3650`
+
 #### Server端
 
 通过方法`NewServerTLSFromFile`输入：
