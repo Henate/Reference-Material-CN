@@ -586,7 +586,7 @@ func main() {
 
 ### CA for gRPC
 
-#### 生成CA证书
+#### 生成CA
 
 - 引入遵守 X.509 标准的 CA 颁发的根证书保证证书的可靠性和有效性。
 
@@ -595,14 +595,14 @@ func main() {
 1. 公钥
 2. 密钥
 
-##### 生成ca.key
+##### 生成私钥ca.key
 `openssl genrsa -out ca.key 2048`
 ```go
 //Output：
 Generating RSA private key, 2048 bit long modulus
 ```
 
-##### 生成证书密钥ca.pem
+##### 生成自签CA证书ca.pem
 `openssl req -new -x509 -days 7200 -key ca.key -out ca.pem`
 ```go
 //Output
@@ -621,17 +621,24 @@ Organizational Unit Name (eg, section) []:ME
 Common Name (e.g. server FQDN or YOUR name) []:Streaming-gRPC
 Email Address []:Henate@126.com
 PS D:\_Work\_Doing\gRPC-go\src\github.com\Henate\Streaming-gRPC\conf>
-
 ```
 
-#### Server证书
+#### Server端证书
+
+##### 生成Server端ECC密钥
+命令：`openssl ecparam -genkey -name secp384r1 -out server.key`
 
 ##### 生成CSR
-CSR 是 Cerificate Signing Request 的英文缩写，为证书请求文件。主要作用是 CA 会利用 CSR 文件进行签名使得攻击者无法伪装或篡改原有证书
+解释：CSR 是 Cerificate Signing Request 的英文缩写，为证书签名请求文件。主要作用是 CA 会利用 CSR 文件进行签名使得攻击者无法伪装或篡改原有证书
+关键命令：`openssl req`
 命令：`openssl req -new -key server.key -out server.csr`
+    > 此步是使用server私钥向CA申请证书签名请求。
 
 ##### 使用CA签名CSR
+- 使用根CA证书对"请求签发证书"进行签发，生成x509格式证书
+关键命令：`openssl x509`
 命令：`openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in server.csr -outserver.pem`
+    > CA证书+CA私钥签名server的CSR生成x509CA签名证书
 
 输出：
 ```go
@@ -639,16 +646,30 @@ Signature ok
 subject=C = CN, ST = GD, L = GZ, O = PIS, OU = ME, CN = Streaming-gRPC, emailAddress = Henate@126.com
 Getting CA Private Key
 ```
-#### Client证书
 
-##### 生成 Key
+#### Client端证书
+
+##### 生成Client端ECC密钥
 `openssl ecparam -genkey -name secp384r1 -out client.key`
 ##### 生成 CSR
+关键命令：`openssl req`
 `openssl req -new -key client.key -out client.csr`
 ##### 基于 CA 签发
-`openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -outclient.pem`
+关键命令：`openssl x509`
+- 使用根CA证书对"请求签发证书"进行签发，生成x509格式证书
+`openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -out client.pem`
 
-##### 小结
+#### Server端实现
+
+1. 使用`tls.LoadX509KeyPair()`读取server端的私钥+CA签名server证书，返回一个密钥对`Certificate`。
+2. 使用`certPool`的方法`AppendCertsFromPEM()`校验密钥对是否能通过CA证书的验证，若通过，加入到`certPool`中
+3. 使用`credentials.NewTLS()`配置tls，参数有密钥对`Certificate`+校验方式+`certPool`
+
+#### Client端实现
 1. Client 通过请求得到 Server 端的证书
 2. 使用 CA 认证的根证书对 Server 端的证书进行可靠性、有效性等校验
 3. 校验 ServerName 是否可用、有效
+
+
+
+
