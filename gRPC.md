@@ -595,8 +595,10 @@ func main() {
 1. 公钥
 2. 密钥
 
-##### 生成私钥ca.key
+##### 生成ca.key
 `openssl genrsa -out ca.key 2048`
+使用genras生成的ca.key同时包含公钥与私钥。
+
 ```go
 //Output：
 Generating RSA private key, 2048 bit long modulus
@@ -632,7 +634,7 @@ PS D:\_Work\_Doing\gRPC-go\src\github.com\Henate\Streaming-gRPC\conf>
 解释：CSR 是 Cerificate Signing Request 的英文缩写，为证书签名请求文件。主要作用是 CA 会利用 CSR 文件进行签名使得攻击者无法伪装或篡改原有证书
 关键命令：`openssl req`
 命令：`openssl req -new -key server.key -out server.csr`
-    > 此步是使用server私钥向CA申请证书签名请求。
+    > 此步是使用server生成的key中公钥向CA申请证书签名请求。
 
 ##### 使用CA签名CSR
 - 使用根CA证书对"请求签发证书"进行签发，生成x509格式证书
