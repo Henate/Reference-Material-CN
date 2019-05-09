@@ -670,7 +670,7 @@ Getting CA Private Key
 #### Client端实现
 1. Client 通过请求得到 Server 端的证书
 2. 使用 CA 认证的根证书对 Server 端的证书进行可靠性、有效性等校验
-3. 校验 ServerName 是否可用、有效
+3. 校验 ServerName 是否可用、有效 
 
 
 
