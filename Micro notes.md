@@ -75,9 +75,9 @@ Go Micro可作为一个sidecar 通过HTTP与父程序进行通信。
 
 
 ## 使用protobuf文件定义服务API接口
+优点：使用protobuf可以非常方便去严格定义API，提供服务端与客户端双边具体一致的类型。
 
-> 优点：使用protobuf可以非常方便去严格定义API，提供服务端与客户端双边具体一致的类型。
-
+### 准备生成protoc文件的工具
 在.protoc文件下执行protoc命令。
 注意：如使用protoc需要满足以下任意一个条件：
 1. 在环境变量目录下添加`protoc-gen-micro` & `protoc-gen-go` & `protoc`的工具目录
@@ -91,17 +91,26 @@ protoc --go_out=plugins=micro:. Greeter.proto
 //同时生成Greeter.micro.go & Greeter.pb.go
 protoc --micro_out=. --go_out=. Greeter.proto
 ```
-
+### 编辑.proto文件
 .proto代码
 ```go
+//声明protocbuf的版本
 syntax = "proto3";
+
+//声明生成proto代码的package名(在其他目录中的函数使用该package名调用service注册函数等功能)
 package GreeterExample;
+
+//定义servive Greeter
 service Greeter {        
     rpc Hello(HelloRequest) returns (HelloResponse) {}
 }
+
+//定义servive Say
 service Say {        
     rpc Hello(SayParam) returns (SayResponse) {}
 }
+
+//定义servive中的具体requst&respose
 message SayParam{        
     string ID = 1;
 }
@@ -110,11 +119,32 @@ message SayResponse{        
 }
 message HelloRequest {        
     string name = 1;
-}message HelloResponse {        
+}
+message HelloResponse {        
     string greeting = 2;
 }
 ```
 
+### 生成ProtocName.micro.go
+
+#### 注意事项
+> **注意**：以下文章中提到的**Greeter**是我们在.proto文件中自定义的服务名字，若定义的服务名字是其他，比如**spark**。那么后续自动生成的代码都是围绕着**spark**生成，如可以生成`sparkService` `NewsparkService`等等。
+
+> 以下提到的所有代码均是自动生成。
+
+#### 生成.micro.go文件
+使用`protoc --micro_out=. --go_out=. Greeter.proto`可生成micro中客户端与服务端用于交流的代码，代码存放于go文件：`ProtocName.micro.go`之中
+
+> // Client API for Greeter service
+
+从这一句注释后的一段代码是在.proto文件中已经写好的`service Greeter{...}`的自动生成代码，这一段代码提供 Greeter service的需求函数。
+
+#### 处理器interface
+```go
+type GreeterService interface {        
+    Hello(ctx context.Context, in *HelloRequest, opts ...client.CallOption) (*HelloResponse, error)
+}
+```
 
 
 
