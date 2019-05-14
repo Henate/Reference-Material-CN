@@ -80,6 +80,14 @@ Go Micro可作为一个sidecar 通过HTTP与父程序进行通信。
 
 #### 1.使用option方法创建micro的NewService
 
+代码：创建Service，参数Name为.protoc中定义的package
+```go
+service := micro.NewService(        
+    micro.Name("go.micro.api.example"),
+)
+```
+> 代码详解：
+
 `Option`结构体定义，主要为Micro模块：
 ```go
 type Options struct {        
@@ -171,22 +179,30 @@ func newOptions(opts ...Option) Options {        
 ```
 
 #### 2.解析标识参数
+
+代码：
+```go
+service.Init()
+```
+
 参考[标识文章](https://godoc.org/github.com/micro/go-micro/cmd#pkg-variables)
 Go Micro提供预置的标识，调用`service.Init`执行时就会设置并解析这些参数
 
 #### 3.实现处理器方法
 
-通过.protoc定义的servive可自动生成处理器ExampleService，处理器中的方法为在.protoc中定义的Call。
+通过.protoc定义的servive可自动生成处理器ExampleService，其代码自动生成如下：
 ```go
 type ExampleService interface {        
     Call(ctx context.Context, in *go_api.Request, opts ...client.CallOption) (*go_api.Response, error)
 }
 ```
 
-实现处理器ExampleService的方法作为handler服务。
+以上自动生成的接口方法Call并没有真正地在service实现，需要手动实现处理器ExampleService中定义的方法call作为handler服务。总共需要两步：
 ```go
+//第一步：定义service结构体
 type Example struct{}
 
+//第二步：实现方法Call
 func (e *Example) Call(ctx context.Context, req *proto.CallRequest, rsp *proto.CallResponse) error {        
     log.Print("Received Example.Call request")        
     if len(req.Name) == 0 {               
