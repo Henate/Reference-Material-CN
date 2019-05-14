@@ -74,6 +74,50 @@ Go Micro可作为一个sidecar 通过HTTP与父程序进行通信。
 5. PubSub via WebSockets
 
 
+## 使用protobuf文件定义服务API接口
+
+> 优点：使用protobuf可以非常方便去严格定义API，提供服务端与客户端双边具体一致的类型。
+
+在.protoc文件下执行protoc命令。
+注意：如使用protoc需要满足以下任意一个条件：
+1. 在环境变量目录下添加`protoc-gen-micro` & `protoc-gen-go` & `protoc`的工具目录
+2. 在Go工程目录下的bin中添加`protoc-gen-micro` & `protoc-gen-go` & `protoc`
+以上三个文件均通过使用Go build编译其对应的开源protobuf库所得，用于自动生成我们所需要的protoc格式代码
+```go
+//生成Greeter.micro.go
+protoc --micro_out=plugins=micro:. Greeter.proto
+//Greeter.pb.go
+protoc --go_out=plugins=micro:. Greeter.proto
+//同时生成Greeter.micro.go & Greeter.pb.go
+protoc --micro_out=. --go_out=. Greeter.proto
+```
+
+.proto代码
+```go
+syntax = "proto3";
+package GreeterExample;
+service Greeter {        
+    rpc Hello(HelloRequest) returns (HelloResponse) {}
+}
+service Say {        
+    rpc Hello(SayParam) returns (SayResponse) {}
+}
+message SayParam{        
+    string ID = 1;
+}
+message SayResponse{        
+    string result = 1;
+}
+message HelloRequest {        
+    string name = 1;
+}message HelloResponse {        
+    string greeting = 2;
+}
+```
+
+
+
+
 ## 构建一个Go-micro服务
 
 ### 初始化服务器
