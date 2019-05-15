@@ -102,6 +102,7 @@ package GreeterExample;
 
 //定义servive Greeter
 service Greeter {        
+    //将生成Server端的Hanlder： Hello
     rpc Hello(HelloRequest) returns (HelloResponse) {}
 }
 
@@ -135,16 +136,113 @@ message HelloResponse {        
 #### 生成.micro.go文件
 使用`protoc --micro_out=. --go_out=. Greeter.proto`可生成micro中客户端与服务端用于交流的代码，代码存放于go文件：`ProtocName.micro.go`之中
 
+#### Client端代码
 > // Client API for Greeter service
 
-从这一句注释后的一段代码是在.proto文件中已经写好的`service Greeter{...}`的自动生成代码，这一段代码提供 Greeter service的需求函数。
+从这一句注释后的一段代码是在.proto文件中已经写好的`service Greeter{...}`的自动生成代码，这一段代码提供 Greeter service client端的需求函数。
 
-#### 处理器interface
+##### XXXService interface
+
+GreeterService是Greeter客户端的接口。
+
+而在此处则自动生成了Hello方法所接收的参数有3个：
+1. `ctx context.Context` ：上下文
+2. ` in *HelloRequest`：该服务的request参数
+3. `opts ...client.CallOption`：TODO
+
 ```go
 type GreeterService interface {        
     Hello(ctx context.Context, in *HelloRequest, opts ...client.CallOption) (*HelloResponse, error)
 }
 ```
+
+后续中已经自动实现了Hello方法
+```go
+func (c *greeterService) Hello(ctx context.Context, in *HelloRequest, opts...client.CallOption(*HelloResponse, error) {      
+
+    req := c.c.NewRequest(c.name, "Greeter.Hello", in)        
+    out := new(HelloResponse)        
+    err := c.c.Call(ctx, req, out, opts...)        
+    if err != nil {               
+        return nil, err        
+    }        
+        return out, nil
+}
+```
+
+##### New一个Service
+`greeterService`封装了`Client`以及`name`（name为定义的service package名字）
+```go
+type greeterService struct {        
+    c    client.Client        
+    name string
+}
+```
+输出封装好的`greeterService`
+```go
+func NewGreeterService(name string, c client.Client) GreeterService {        
+    if c == nil {               
+        c = client.NewClient()        
+    }       
+    if len(name) == 0 {               
+        name = "GreeterExample"       
+    }        
+    return &greeterService{               
+        c:    c,               
+        name: name,        
+    }
+}
+```
+
+#### Server端代码
+
+> // Server API for Greeter service 
+
+从这一句话开始为server端的代码。
+
+##### 创建Service Handler
+在接口内部有一个未实现的方法Hello，其在.proto文件中在`GreeterService`中定义为`rpc Hello(HelloRequest) returns (HelloResponse) {}`
+在Server部分的代码将自动生成为：
+
+```go
+type GreeterHandler interface {        
+    Hello(context.Context, *HelloRequest, *HelloResponse) error
+}
+```
+把上面的handler接口函数封装为一个结构体
+```go
+type greeterHandler struct {        
+    GreeterHandler
+}
+```
+#### 注册Handler
+注册Handler在这里需要输入3个参数：
+1. `s server.Server`：使用`NewService`创建的Server，传入此参数是为了向该Server处传递Handler函数。
+2. `hdlr GreeterHandler`：此处传入的hdlr为自定义的结构体类型，传入此参数后将把该hdlr类型通过传递给`Server`接口中`NewHandler`方法，通过获取返回值转变该类型为`Handler`，并赋值于第一个参数`server.Server`。
+3. `opts ...server.HandlerOption`：TODO
+
+```go
+func RegisterGreeterHandler(s server.Server, hdlr GreeterHandler, opts ...server.HandlerOption) {        
+    type greeter interface {               
+        Hello(ctx context.Context, in *HelloRequest, out *HelloResponse) error        
+    }        
+    type Greeter struct {               
+        greeter        
+    }        
+    h := &greeterHandler{hdlr}        
+    s.Handle(s.NewHandler(&Greeter{h}, opts...))
+}
+```
+
+##### 获取service的Hanlder方法
+```go
+func (h *greeterHandler) Hello(ctx context.Context, in *HelloRequest, out *HelloResponse) error{        
+    return h.GreeterHandler.Hello(ctx, in, out)
+}
+```
+
+
+
 
 
 
