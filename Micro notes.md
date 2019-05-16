@@ -201,6 +201,8 @@ func NewGreeterService(name string, c client.Client) GreeterService {     �
 从这一句话开始为server端的代码。
 
 ##### 创建Service Handler
+服务端需要注册handlers，这样才能提供服务并接收请求。处理器相当于是一个拥有公共方法的公共类，它需要符合签名`func(ctx context.Context, req interface{}, rsp interface{}) error`。通过上面的内容，我们看到，Greeter interface的签名如下：
+
 在接口内部有一个未实现的方法Hello，其在.proto文件中在`GreeterService`中定义为`rpc Hello(HelloRequest) returns (HelloResponse) {}`
 在Server部分的代码将自动生成为：
 
@@ -209,6 +211,8 @@ type GreeterHandler interface {        
     Hello(context.Context, *HelloRequest, *HelloResponse) error
 }
 ```
+注：服务端处理器内部的方法不会自动的实现，需要在代码中手动实现。
+
 把上面的handler接口函数封装为一个结构体
 ```go
 type greeterHandler struct {        
@@ -217,8 +221,8 @@ type greeterHandler struct {        
 ```
 #### 注册Handler
 注册Handler在这里需要输入3个参数：
-1. `s server.Server`：使用`NewService`创建的Server，传入此参数是为了向该Server处传递Handler函数。
-2. `hdlr GreeterHandler`：此处传入的hdlr为自定义的结构体类型，传入此参数后将把该hdlr类型通过传递给`Server`接口中`NewHandler`方法，通过获取返回值转变该类型为`Handler`，并赋值于第一个参数`server.Server`。
+1. `s server.Server`：使用`NewService`创建的`Server`方法，传入此参数是为了向该`Server`处传递Handler函数。通过这一动作完成**注册**这一功能。
+2. `hdlr GreeterHandler`：此处传入的hdlr为自定义的结构体类型，传入此参数后将把该hdlr类型通过传递给`Server`方法中`NewHandler`方法，通过获取返回值转变该类型为`Handler`，并赋值于第一个参数`server.Server`。
 3. `opts ...server.HandlerOption`：TODO
 
 ```go
