@@ -31,6 +31,20 @@ Registry注册模块提供可插拔的服务注册与发现功能，当前实现
 
 Selector选择器通过选举提供负载均衡机制。当客户端请求服务时，它首先要向查询到服务注册信息，一般情况是返回所需服务的注册成功的节点列表。选择器会选择其中一个用来提供服务。多次调用选择器会触发均衡算法，当前的算法有`round robin（循环调度）`，`哈希随机`和`黑名单`。
 
+##### Selector请求重试
+请求可能会因为某种原因失败，网络、负载、宕机等等，理想情况是，在发生这些事后，我们仍能能把请求重新发到程序的另一个节点并收到成功的响应。
+
+- 解决方案
+micro客户端内置有重试机制。选择器（上面有提到）会返回一个叫Next的函数，这个函数在执行时会基于负载均衡策略从服务列表中返回一个节点。Next函数可以执行多次，基于负载均衡策略返回新的节点。如果重试有设置，在请求失败时，Next函数便会执行并把请求发向另一个新的节点。使用方式重置可以通过命令行标记或代码选项在客户端传入。默认值是1，也即是一次请求尝试一回。
+
+1. 通过命令行flag传入`micro --client_retries=3`
+
+2. 设置选项
+```go
+client.Init(
+        client.Retries(3),
+)
+```
 #### Broker
 
 Broker是事件广播/订阅（PUB/SUB）可插件接口。对于事件驱动的微服务架构，消息广播与订阅得放在首要位置。目前的实现有NATs、rabbitmq、http (仍在开发中)。
@@ -48,16 +62,68 @@ Server服务就是运行了真实的微服务的程序，它提供的服务通�
 #### Plugins
 [go-plugins](https://github.com/micro/go-plugins)提供了各个模块的可替换方案。只需要在代码中重新注册某个模块即可替换默认的模块方案。
 
+### 安装micro
+micro在go-micro种是一个多功能工具，安装后有各种功能方便我们开发。
+#### 获取库
+go 命令：`go get -u github.com/micro/micro`
+Docker：`docker pull microhq/micro`
+
+#### 服务发现启动
+Consul启动：`consul agent -dev`
+
+#### mDNS组播系统
+
+Micro内置了mDNS组播系统，这是一种零依赖的服务注册发现机制，它是区别于有注册中心的替代方案。通过在启动指令中传入`--registry=mdns` 或者在环境变量中设置`MICRO_REGISTRY=mdns`。其实也可以不传，早期版本的go-micro默认注册中心是consul，现在换成了mdns
+```go
+# 使用命令行参数
+micro --registry=mdns list services
+
+# 使用环境变量
+MICRO_REGISTRY=mdns micro list services`
+```
+
+#### 列出所有的服务
+当服务运行后，可以使用micro工具把当前的服务列出：
+```go
+micro list services
+```
+
+输出：
+```go
+consul
+go.micro.srv.example
+topic:topic.go.micro.srv.example
+```
+上例中列出的服务为`example`，`go.micro.srv`是后台服务名的默认前缀
+
 ### 微服务工具库：Micro
 参考地址：[github.com/micro/micro](github.com/micro/micro)
 ![123b9d74630c04db4e8ab880f3c8acb1.png](en-resource://database/503:1)
 
+
+#### api 
+**API Gateway 网关 :**
+1. Micro API基于服务发现拥有强大的路由能力，它可以处理http、gRPC、websocket、消息推送事件等等。
+2. API网关作为单一的http入口，它使用服务发现中查询的服务地址，把请求动态路由到具体服务。
+3. 建立可伸缩的后台微服务架构，并且让工作在前端的公共API更健壮。
+
+#### proxy
+**Service Proxy:**
+服务代理，这是一个在Go Micro和[MUCP](https://github.com/micro/protocol) (通信协议，有Request/Stream/Publish 3种形式)协议之上构建的透明的代理服务。它将服务发现、负载均衡、消息编码、中间件、传输及代理插件卸载到单一位置。
+
+#### web 
+Web Dashboard web控制台。 提供可视化的发现与管理监控界面。
+#### cli 
+Command line interface 命令行接口。提供描述、查询终端服务的交互入口。
+#### bot
+Slack与hipchat bot消息通知工具。也就是通过消息传递的CLI。
+#### new 
+**Service Templates:**
+一键生成服务：`micro new github.com/micro/example`
+服务生成模板，目的是快速生成服务代码，让编写代码飞起来。Micro预置了一些模板用来编写服务。 保持相同的方式编写服务，提高效率。
+
+#### github库
 开源库下的各模块单独为一个目录：
-- api - API Gateway 网关。它是独立的HTTP入口，基于服务发现机制实现动态路由。
-- web - Web Dashboard web控制台。 提供可视化的发现与管理监控界面。
-- cli - Command line interface 命令行接口。提供描述、查询终端服务的交互入口。
-- bot - Slack与hipchat bot消息通知工具。也就是通过消息传递的CLI。
-- new - 新服务构建模板。
 ![da7b28585dea1ecf142b57e3112a54f0.png](en-resource://database/505:1)
 
 
