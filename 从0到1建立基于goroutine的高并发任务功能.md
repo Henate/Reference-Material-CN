@@ -1,4 +1,4 @@
-### 开始一个最小的多线程模型
+## 开始一个最小的多线程模型
 
 在Go语言中，我们可以在函数或方法前添加 go 关键字能够在新的 goroutine 中调用它。当调用完成后， 该 goroutine 也会安静地退出。
 
@@ -17,14 +17,14 @@ func Printinfo() {
 ```
 以上的实现的函数功能没有任何实用性，因为没有实现完成时的信号处理。而完成信号处理，需要我们今天的主角：信道(channel)
 
-### Channel
+## Channel
 ```go
 ci := make(chan int) // 整数类型的无缓冲信道 
 cj := make(chan int, 0) // 整数类型的无缓冲信道 
 cs := make(chan *os.File, 100) // 指向文件指针的带缓冲信道
 ```
 
-#### 使用无缓冲channel进行简单通信
+### 使用无缓冲channel进行简单通信
 无缓冲channel在通信时会阻塞地同步交换数据，确保两个通信的goroutine处于确定的状态。
 
 在下面实例中，GetInfo()一定会在执行PrintInfo()完毕之前都处于阻塞状态。通过channel确保两个goroutine的执行顺序逻辑。
@@ -47,7 +47,7 @@ func Printinfo() {
 因此我们可以确定：
 - 若信道是不带缓冲的，那么在接收者收到值前， 发送者会一直阻塞
 
-#### 使用带缓冲的channel进行简单通信
+### 使用带缓冲的channel进行简单通信
 
 带缓冲的信道可被用作信号量，例如限制吞吐量。同一时间只允许执行一定数量的goroutine：
 ```go
@@ -69,7 +69,7 @@ func serveOrder(orders ...interface{}) {
 
 > 以下举两个例子可以避免以上的BUG。
 
-##### Fix Bug 1.往goroutine闭包传递参数
+#### Fix Bug 1.往goroutine闭包传递参数
 
 ```go
 func serveOrder(orders ...interface{}) { 
@@ -83,7 +83,7 @@ func serveOrder(orders ...interface{}) {
 }
 ```
 
-##### Fix Bug 2. 使用同名变量作goroutine参数
+#### Fix Bug 2. 使用同名变量作goroutine参数
 
 ```go
 func serveOrder(orders ...interface{}) { 
