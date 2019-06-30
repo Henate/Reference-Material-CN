@@ -98,3 +98,24 @@ func serveOrder(orders ...interface{}) {
 }
 ```
 注：不使用同名变量也可以达到同样效果
+
+### 在channel中使用channel回复
+- 我们假设channel通信由发送方端发起的，那么我们如何才能用最简单直接的方法回复给发送方呢？
+
+我们首先定义一个带有channel成员的request结构体。
+```go
+type request struct { 
+    arg      []int 
+    f        func([]int) int 
+    resultch chan int   //通信
+}
+```
+
+在接受方中就可以直接使用上述定义的channel进行回复：
+```go
+func Serve(queue *request) {
+    for req := range queue {        
+        req.resultch <- req.f(req.arg) 
+    }
+}
+```
