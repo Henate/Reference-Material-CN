@@ -119,3 +119,47 @@ func Serve(queue *request) {
     }
 }
 ```
+
+### 同步所有go routine
+因为所有go routine都是异步执行的，因此我们的主程序可能还没有等待所有go routine执行完毕前就准备好退出当前函数，此时我们就需要一个同步的功能。
+
+#### 使用sync包完成同步
+使用sync包十分简单，分为五步：
+
+1. 使用sync.WaitGroup创建一个WaitGroup
+2. 调用.Add()记录goroutine的数量到刚刚创建的WaitGroup中
+3. 把创建的WaitGroup已指针形式传递到go routine中
+4. 在go routine中使用defer go_sync.Done()保证线程退出后把WaitGroup的数量减少
+5. 在主线程中调用go_sync.Wait()等待所有go routine结束
+
+```go
+func serveOrder(go_sync *sync.WaitGroup, orders ...interface{}) { 
+    defer func() {         
+        err := recover()         
+        if err != nil {                 
+        fmt.Println(err)         
+        } 
+    }() 
+    defer go_sync.Done() 
+    for _, order := range orders {         
+        order := order         
+        Orderch <- 1         
+        go func() {                 
+            processOrder(order)                 
+            <-Orderch         
+        }() 
+    }
+}
+func main() { 
+    var go_sync sync.WaitGroup
+    var or1 = orders{name: "Buy"} 
+    var or2 = orders{name: "Sell"} 
+    for i := 0; i < 10; i++ {         
+        or1 = orders{name: "Buy", number: i}         
+        or2 = orders{name: "Sell", number: i + 3}         
+        go_sync.Add(1)         
+        serveOrder(&go_sync, or1, or2) 
+    } 
+    go_sync.Wait()
+}
+```
