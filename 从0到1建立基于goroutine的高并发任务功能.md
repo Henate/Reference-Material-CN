@@ -163,3 +163,45 @@ func main() {
     go_sync.Wait()
 }
 ```
+
+#### 使用channel中的channel进行同步
+在go routine设计中，channel是用于 go routine间的通信，因此使用channel作同步是十分自然而然的动作。
+
+```go
+func serveOrder(ExitCh chan int, orders ...interface{}) { 
+    defer func() {         
+        err := recover()         
+        if err != nil {                 
+        fmt.Println(err)         
+        } 
+    }() 
+
+    defer func() {         
+        ExitCh <- 1 
+    }()
+    
+    for _, order := range orders {         
+        order := order         
+        Orderch <- 1         
+        go func() {                 
+            processOrder(order)                 
+            <-Orderch         
+        }() 
+    }
+}
+func main() { 
+    var go_sync sync.WaitGroup
+    var or1 = orders{name: "Buy"} 
+    var or2 = orders{name: "Sell"} 
+    for i := 0; i < 10; i++ {         
+        or1 = orders{name: "Buy", number: i}         
+        or2 = orders{name: "Sell", number: i + 3}         
+        go_sync.Add(1)         
+        serveOrder(ExitCh, or1, or2) 
+    } 
+    for j := 0; j < 20; j++ {         
+        <-ExitCh
+    } 
+    close(ExitCh)
+}
+```
